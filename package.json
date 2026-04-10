@@ -1,0 +1,18 @@
+{
+  "name": "techtransit",
+  "version": "0.1.0",
+  "private": true,
+  "workspaces": [
+    "frontend",
+    "backend"
+  ],
+  "scripts": {
+    "lint": "npm run lint -w backend -w frontend",
+    "build": "npm run build -w backend -w frontend",
+    "format": "prettier --write \"**/*.{ts,tsx,json}\" --ignore-path .gitignore",
+    "format:check": "prettier --check \"**/*.{ts,tsx,json}\" --ignore-path .gitignore"
+  },
+  "devDependencies": {
+    "prettier": "^3.3.3"
+  }
+}

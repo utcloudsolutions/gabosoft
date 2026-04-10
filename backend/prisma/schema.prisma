@@ -1,0 +1,224 @@
+generator client {
+  provider = "prisma-client-js"
+}
+
+datasource db {
+  provider  = "postgresql"
+  url       = env("DATABASE_URL")
+  directUrl = env("DIRECT_URL")
+}
+
+// ============================================================
+// Enums
+// ============================================================
+
+enum RolUsuario {
+  ADMIN
+  SUPERVISOR
+  COLABORADOR
+}
+
+enum EstadoProceso {
+  ESTRUCTURACION
+  PRESENTACION
+  GANADO
+  NO_ADJUDICADO
+  DESIERTO
+}
+
+enum SemaforoContrato {
+  VERDE
+  AMARILLO
+  ROJO
+}
+
+enum EstadoHito {
+  PENDIENTE
+  EN_PROGRESO
+  COMPLETADO
+  VENCIDO
+}
+
+// ============================================================
+// Models
+// ============================================================
+
+model Entidad {
+  id               String   @id @default(uuid())
+  nombre           String
+  nit              String   @unique
+  tipo             String?
+  municipio        String?
+  departamento     String?
+  contactoNombre   String?  @map("contacto_nombre")
+  contactoEmail    String?  @map("contacto_email")
+  contactoTelefono String?  @map("contacto_telefono")
+  activo           Boolean  @default(true)
+  createdAt        DateTime @default(now()) @map("created_at")
+  updatedAt        DateTime @updatedAt @map("updated_at")
+
+  procesos  ProcesoPrecontractual[]
+  contratos Contrato[]
+
+  @@index([activo])
+  @@map("entidad")
+}
+
+model Usuario {
+  id           String     @id @default(uuid())
+  nombre       String
+  email        String     @unique
+  passwordHash String     @map("password_hash")
+  rol          RolUsuario @default(COLABORADOR)
+  activo       Boolean    @default(true)
+  refreshToken String?    @map("refresh_token")
+  createdAt    DateTime   @default(now()) @map("created_at")
+  updatedAt    DateTime   @updatedAt @map("updated_at")
+
+  procesos  ProcesoPrecontractual[]
+  historial HistorialProceso[]
+  contratos Contrato[]
+
+  @@index([rol])
+  @@index([activo])
+  @@map("usuario")
+}
+
+model Aliado {
+  id               String  @id @default(uuid())
+  nombre           String
+  nit              String? @unique
+  tipo             String?
+  contactoNombre   String? @map("contacto_nombre")
+  contactoEmail    String? @map("contacto_email")
+  contactoTelefono String? @map("contacto_telefono")
+  activo           Boolean @default(true)
+
+  createdAt DateTime @default(now()) @map("created_at")
+  updatedAt DateTime @updatedAt @map("updated_at")
+
+  procesos ProcesoAliado[]
+
+  @@index([activo])
+  @@map("aliado")
+}
+
+model ProcesoPrecontractual {
+  id                String        @id @default(uuid())
+  entidadId         String        @map("entidad_id")
+  responsableId     String        @map("responsable_id")
+  nombre            String
+  numeroProceso     String?       @map("numero_proceso")
+  objeto            String?
+  estado            EstadoProceso @default(ESTRUCTURACION)
+  valorEstimado     Decimal?      @map("valor_estimado") @db.Decimal(18, 2)
+  valorAdjudicado   Decimal?      @map("valor_adjudicado") @db.Decimal(18, 2)
+  fechaApertura     DateTime?     @map("fecha_apertura") @db.Date
+  fechaCierre       DateTime?     @map("fecha_cierre") @db.Date
+  fechaAdjudicacion DateTime?     @map("fecha_adjudicacion") @db.Date
+  modalidad         String?
+  notas             String?
+  createdAt         DateTime      @default(now()) @map("created_at")
+  updatedAt         DateTime      @updatedAt @map("updated_at")
+
+  entidad     Entidad      @relation(fields: [entidadId], references: [id])
+  responsable Usuario      @relation(fields: [responsableId], references: [id])
+  aliados     ProcesoAliado[]
+  historial   HistorialProceso[]
+  contratos   Contrato[]
+
+  @@index([entidadId])
+  @@index([responsableId])
+  @@index([estado])
+  @@index([fechaCierre])
+  @@map("proceso_precontractual")
+}
+
+model ProcesoAliado {
+  procesoId               String   @map("proceso_id")
+  aliadoId                String   @map("aliado_id")
+  rolConsorcio            String?  @map("rol_consorcio")
+  porcentajeParticipacion Decimal? @map("porcentaje_participacion") @db.Decimal(5, 2)
+  createdAt               DateTime @default(now()) @map("created_at")
+  updatedAt               DateTime @updatedAt @map("updated_at")
+
+  proceso ProcesoPrecontractual @relation(fields: [procesoId], references: [id], onDelete: Cascade)
+  aliado  Aliado                @relation(fields: [aliadoId], references: [id], onDelete: Cascade)
+
+  @@id([procesoId, aliadoId])
+  @@index([aliadoId])
+  @@map("proceso_aliado")
+}
+
+model HistorialProceso {
+  id              String         @id @default(uuid())
+  procesoId       String         @map("proceso_id")
+  usuarioId       String         @map("usuario_id")
+  estadoAnterior  EstadoProceso? @map("estado_anterior")
+  estadoNuevo     EstadoProceso  @map("estado_nuevo")
+  comentario      String?
+  createdAt       DateTime       @default(now()) @map("created_at")
+
+  proceso ProcesoPrecontractual @relation(fields: [procesoId], references: [id], onDelete: Cascade)
+  usuario Usuario               @relation(fields: [usuarioId], references: [id])
+
+  @@index([procesoId])
+  @@index([usuarioId])
+  @@index([createdAt(sort: Desc)])
+  @@map("historial_proceso")
+}
+
+model Contrato {
+  id               String           @id @default(uuid())
+  procesoId        String?          @map("proceso_id")
+  entidadId        String           @map("entidad_id")
+  responsableId    String           @map("responsable_id")
+  numeroContrato   String           @unique @map("numero_contrato")
+  objeto           String
+  valorTotal       Decimal          @map("valor_total") @db.Decimal(18, 2)
+  valorEjecutado   Decimal          @default(0) @map("valor_ejecutado") @db.Decimal(18, 2)
+  avanceFisico     Decimal          @default(0) @map("avance_fisico") @db.Decimal(5, 2)
+  semaforo         SemaforoContrato @default(VERDE)
+  fechaInicio      DateTime         @map("fecha_inicio") @db.Date
+  fechaFin         DateTime         @map("fecha_fin") @db.Date
+  fechaFinReal     DateTime?        @map("fecha_fin_real") @db.Date
+  supervisorNombre String?          @map("supervisor_nombre")
+  supervisorEmail  String?          @map("supervisor_email")
+  notas            String?
+  activo           Boolean          @default(true)
+  createdAt        DateTime         @default(now()) @map("created_at")
+  updatedAt        DateTime         @updatedAt @map("updated_at")
+
+  proceso     ProcesoPrecontractual? @relation(fields: [procesoId], references: [id])
+  entidad     Entidad                @relation(fields: [entidadId], references: [id])
+  responsable Usuario                @relation(fields: [responsableId], references: [id])
+  hitos       HitoContrato[]
+
+  @@index([entidadId])
+  @@index([responsableId])
+  @@index([semaforo])
+  @@index([activo])
+  @@index([fechaFin])
+  @@map("contrato")
+}
+
+model HitoContrato {
+  id                String     @id @default(uuid())
+  contratoId        String     @map("contrato_id")
+  nombre            String
+  descripcion       String?
+  fechaLimite       DateTime   @map("fecha_limite") @db.Date
+  fechaCumplimiento DateTime?  @map("fecha_cumplimiento") @db.Date
+  estado            EstadoHito @default(PENDIENTE)
+  valorAsociado     Decimal?   @map("valor_asociado") @db.Decimal(18, 2)
+  observaciones     String?
+  createdAt         DateTime   @default(now()) @map("created_at")
+  updatedAt         DateTime   @updatedAt @map("updated_at")
+
+  contrato Contrato @relation(fields: [contratoId], references: [id], onDelete: Cascade)
+
+  @@index([contratoId])
+  @@index([estado])
+  @@index([fechaLimite])
+  @@map("hito_contrato")
+}

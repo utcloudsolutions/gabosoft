@@ -1,0 +1,319 @@
+@import "tailwindcss";
+
+/* ============================================================
+   TechTransit — Design Tokens (Liquid Glass System)
+   ============================================================ */
+:root {
+  /* Backgrounds */
+  --bg-base:      #07071a;
+  --bg-secondary: #0d0d24;
+
+  /* Glass surfaces */
+  --glass-xs:            rgba(255, 255, 255, 0.055);
+  --glass-sm:            rgba(255, 255, 255, 0.085);
+  --glass-md:            rgba(255, 255, 255, 0.12);
+  --glass-lg:            rgba(255, 255, 255, 0.17);
+  --glass-border:        rgba(255, 255, 255, 0.14);
+  --glass-border-strong: rgba(255, 255, 255, 0.26);
+
+  /* Blur levels */
+  --blur-sm:  blur(12px) saturate(160%);
+  --blur-md:  blur(24px) saturate(180%);
+  --blur-lg:  blur(40px) saturate(200%);
+
+  /* Accent — azul institucional */
+  --primary:       #3B82F6;
+  --primary-light: #60A5FA;
+  --primary-glow:  rgba(59, 130, 246, 0.30);
+  --primary-glass: rgba(59, 130, 246, 0.15);
+
+  /* Semáforo */
+  --verde:          #22C55E;
+  --amarillo:       #F59E0B;
+  --rojo:           #EF4444;
+  --verde-glass:    rgba(34,  197, 94,  0.15);
+  --amarillo-glass: rgba(245, 158, 11,  0.15);
+  --rojo-glass:     rgba(239, 68,  68,  0.15);
+
+  /* Estados proceso */
+  --estado-estructuracion: #818CF8;
+  --estado-presentacion:   #F59E0B;
+  --estado-ganado:         #22C55E;
+  --estado-no-adjudicado:  #EF4444;
+  --estado-desierto:       #6B7280;
+
+  /* Typography */
+  --text-primary:   rgba(255, 255, 255, 0.92);
+  --text-secondary: rgba(255, 255, 255, 0.55);
+  --text-muted:     rgba(255, 255, 255, 0.30);
+
+  /* ── Spacing scale ──────────────────────────────────────────
+     Cambiar estos valores reescala TODO el layout uniformemente */
+  --space-1:  4px;
+  --space-2:  8px;
+  --space-3:  12px;
+  --space-4:  16px;
+  --space-5:  20px;
+  --space-6:  24px;
+  --space-7:  28px;
+  --space-8:  32px;
+
+  /* Padding semánticos reutilizables */
+  --pad-card:    var(--space-6);          /* interior de cards */
+  --pad-row:     var(--space-4) var(--space-5); /* filas de lista */
+  --pad-badge:   5px var(--space-3);      /* badges/chips */
+  --pad-input:   11px var(--space-4);     /* inputs */
+  --pad-btn:     10px var(--space-5);     /* botones normales */
+  --pad-btn-sm:  6px var(--space-3);      /* botones pequeños */
+  --pad-section: var(--space-7) var(--space-8); /* padding del main */
+  --pad-sidebar: var(--space-5) var(--space-3); /* sidebar vertical/horizontal */
+  --pad-topbar:  0 var(--space-8);        /* topbar horizontal */
+
+  /* Gaps semánticos */
+  --gap-xs:  var(--space-1);
+  --gap-sm:  var(--space-2);
+  --gap-md:  var(--space-3);
+  --gap-lg:  var(--space-4);
+  --gap-xl:  var(--space-6);
+  --gap-2xl: var(--space-7);
+
+  /* Radios */
+  --radius-sm:   8px;
+  --radius-md:   10px;
+  --radius-lg:   14px;
+  --radius-xl:   20px;
+  --radius-full: 9999px;
+
+  /* Layout */
+  --sidebar-w: 248px;
+  --topbar-h:  64px;
+}
+
+/* ============================================================
+   Reset & base
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+html, body, #root {
+  height: 100%;
+  width: 100%;
+  overflow: hidden;
+}
+
+body {
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Display', 'Segoe UI', sans-serif;
+  background-color: var(--bg-base);
+  color: var(--text-primary);
+  -webkit-font-smoothing: antialiased;
+  font-size: 14px;
+  line-height: 1.5;
+}
+
+/* ============================================================
+   Background ambient
+   ============================================================ */
+.bg-ambient {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.bg-ambient::before {
+  content: '';
+  position: absolute;
+  top: -15%; left: -5%;
+  width: 65%; height: 65%;
+  background: radial-gradient(circle, rgba(59,130,246,0.45) 0%, rgba(59,130,246,0.15) 40%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(60px);
+}
+.bg-ambient::after {
+  content: '';
+  position: absolute;
+  bottom: -10%; right: -5%;
+  width: 55%; height: 55%;
+  background: radial-gradient(circle, rgba(129,140,248,0.38) 0%, rgba(99,102,241,0.12) 40%, transparent 70%);
+  border-radius: 50%;
+  filter: blur(60px);
+}
+.bg-ambient-extra {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  overflow: hidden;
+  pointer-events: none;
+}
+.bg-ambient-extra::before {
+  content: '';
+  position: absolute;
+  top: 50%; left: 40%;
+  width: 45%; height: 45%;
+  background: radial-gradient(circle, rgba(139,92,246,0.22) 0%, transparent 65%);
+  border-radius: 50%;
+  filter: blur(80px);
+}
+
+/* ============================================================
+   Glass utilities
+   ============================================================ */
+.glass {
+  background: var(--glass-sm);
+  backdrop-filter: var(--blur-md);
+  -webkit-backdrop-filter: var(--blur-md);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  box-shadow:
+    0 1px 0 0 rgba(255,255,255,0.07) inset,
+    0 4px 24px rgba(0,0,0,0.35);
+}
+.glass-prominent {
+  background: var(--glass-md);
+  backdrop-filter: var(--blur-lg);
+  -webkit-backdrop-filter: var(--blur-lg);
+  border: 1px solid var(--glass-border-strong);
+  border-radius: var(--radius-xl);
+  box-shadow:
+    0 1px 0 0 rgba(255,255,255,0.12) inset,
+    0 8px 40px rgba(0,0,0,0.45),
+    0 0 0 1px rgba(255,255,255,0.04);
+}
+
+/* ============================================================
+   Componentes genéricos
+   ============================================================ */
+
+/* Card — contenedor con padding estándar */
+.card {
+  composes: glass;
+  padding: var(--pad-card);
+}
+
+/* Lista glass — sin padding propio, las filas lo tienen */
+.list-glass {
+  background: var(--glass-sm);
+  backdrop-filter: var(--blur-md);
+  -webkit-backdrop-filter: var(--blur-md);
+  border: 1px solid var(--glass-border);
+  border-radius: var(--radius-lg);
+  overflow: hidden;
+  box-shadow:
+    0 1px 0 0 rgba(255,255,255,0.07) inset,
+    0 4px 24px rgba(0,0,0,0.30);
+}
+
+/* Fila de lista — padding uniforme */
+.list-row {
+  display: flex;
+  align-items: center;
+  gap: var(--gap-lg);
+  padding: var(--pad-row);
+  border-top: 1px solid rgba(255,255,255,0.06);
+  transition: background 160ms ease;
+  cursor: pointer;
+}
+.list-row:first-child { border-top: none; }
+.list-row:hover { background: rgba(255,255,255,0.04); }
+
+/* Badge / chip */
+.badge {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gap-xs);
+  padding: var(--pad-badge);
+  border-radius: var(--radius-full);
+  font-size: 12px;
+  font-weight: 500;
+  white-space: nowrap;
+}
+
+/* Botón primario */
+.btn-primary {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: var(--gap-sm);
+  padding: var(--pad-btn);
+  border-radius: var(--radius-md);
+  font-size: 14px;
+  font-weight: 600;
+  color: #fff;
+  background: var(--primary);
+  border: none;
+  cursor: pointer;
+  box-shadow: 0 0 28px var(--primary-glow), 0 4px 12px rgba(0,0,0,0.3);
+  transition: opacity 200ms, box-shadow 200ms;
+}
+.btn-primary:hover   { opacity: 0.92; }
+.btn-primary:active  { opacity: 0.80; }
+.btn-primary:disabled { opacity: 0.55; cursor: not-allowed; box-shadow: none; }
+
+/* Botón ghost */
+.btn-ghost {
+  display: inline-flex;
+  align-items: center;
+  gap: var(--gap-sm);
+  padding: var(--pad-btn-sm);
+  border-radius: var(--radius-md);
+  font-size: 13px;
+  font-weight: 500;
+  color: var(--text-secondary);
+  background: transparent;
+  border: 1px solid transparent;
+  cursor: pointer;
+  transition: color 180ms, background 180ms, border-color 180ms;
+}
+.btn-ghost:hover {
+  color: var(--text-primary);
+  background: var(--glass-sm);
+  border-color: var(--glass-border);
+}
+
+/* Input */
+.input {
+  width: 100%;
+  padding: var(--pad-input);
+  border-radius: var(--radius-md);
+  border: 1px solid var(--glass-border);
+  background: var(--glass-xs);
+  color: var(--text-primary);
+  font-size: 14px;
+  outline: none;
+  transition: border-color 200ms, box-shadow 200ms;
+}
+.input::placeholder { color: var(--text-muted); }
+.input:focus {
+  border-color: rgba(59,130,246,0.70);
+  box-shadow: 0 0 0 3px rgba(59,130,246,0.15);
+}
+
+/* Select dropdown option hover */
+.select-option:hover {
+  background: rgba(255,255,255,0.07) !important;
+}
+
+/* Divider */
+.divider {
+  width: 100%;
+  height: 1px;
+  background: rgba(255,255,255,0.08);
+}
+
+/* Label de sección pequeña */
+.section-label {
+  font-size: 11px;
+  font-weight: 600;
+  letter-spacing: 0.07em;
+  text-transform: uppercase;
+  color: rgba(255,255,255,0.28);
+}
+
+/* ============================================================
+   Scrollbar
+   ============================================================ */
+::-webkit-scrollbar { width: 4px; }
+::-webkit-scrollbar-track { background: transparent; }
+::-webkit-scrollbar-thumb {
+  background: var(--glass-border);
+  border-radius: var(--radius-full);
+}

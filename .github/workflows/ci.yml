@@ -16,7 +16,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
@@ -38,7 +38,7 @@ jobs:
       - name: Setup Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '24'
           cache: 'npm'
 
       - name: Install dependencies
@@ -50,7 +50,6 @@ jobs:
       - name: Build backend
         run: npm run build -w backend
         env:
-          # Variables mínimas para que tsc no falle en validación de env
           DATABASE_URL: "postgresql://user:pass@localhost:5432/db"
           DIRECT_URL: "postgresql://user:pass@localhost:5432/db"
           JWT_ACCESS_SECRET: "ci_access_secret_32_characters_min"

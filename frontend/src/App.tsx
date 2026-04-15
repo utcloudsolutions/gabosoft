@@ -6,6 +6,9 @@ import { AppLayout } from './layouts/AppLayout';
 import { LoginPage } from './pages/LoginPage';
 import { DashboardPage } from './pages/DashboardPage';
 import { PrecontractualPage } from './pages/PrecontractualPage';
+import { ContratosPage } from './pages/ContratosPage';
+import { CatalogosPage } from './pages/CatalogosPage';
+import { NotificacionesPage } from './pages/NotificacionesPage';
 import './styles/globals.css';
 
 export default function App() {
@@ -22,9 +25,9 @@ export default function App() {
             <Route index element={<Navigate to="/dashboard" replace />} />
             <Route path="/dashboard"      element={<DashboardPage />} />
             <Route path="/precontractual" element={<PrecontractualPage />} />
-            <Route path="/contratos"      element={<PlaceholderPage title="Gestión de Contratos" />} />
-            <Route path="/catalogos"      element={<PlaceholderPage title="Catálogos" />} />
-            <Route path="/notificaciones" element={<PlaceholderPage title="Notificaciones" />} />
+            <Route path="/contratos"      element={<ContratosPage />} />
+            <Route path="/catalogos"      element={<CatalogosPage />} />
+            <Route path="/notificaciones" element={<NotificacionesPage />} />
           </Route>
         </Route>
 
@@ -34,13 +37,3 @@ export default function App() {
   );
 }
 
-function PlaceholderPage({ title }: { title: string }) {
-  return (
-    <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'center', height: '100%' }}>
-      <div className="glass-prominent" style={{ padding: 'var(--space-8) var(--space-7)', textAlign: 'center' }}>
-        <p style={{ color: 'var(--text-muted)', fontSize: 13 }}>Próximamente</p>
-        <h2 style={{ color: 'var(--text-primary)', fontSize: 22, fontWeight: 600, marginTop: 'var(--gap-xs)' }}>{title}</h2>
-      </div>
-    </div>
-  );
-}

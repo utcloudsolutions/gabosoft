@@ -1,7 +1,9 @@
-import { Outlet, useLocation } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
+import { useEffect, useState } from 'react';
 import { Sidebar } from '../components/layout/Sidebar';
 import { Bell } from 'lucide-react';
 import { useAuthStore } from '../store/authStore';
+import { notificacionesApi } from '../lib/api.notificaciones';
 
 const PAGE_TITLES: Record<string, string> = {
   '/dashboard':      'Dashboard',
@@ -12,9 +14,18 @@ const PAGE_TITLES: Record<string, string> = {
 };
 
 export function AppLayout() {
-  const { pathname } = useLocation();
-  const user  = useAuthStore((s) => s.user);
-  const title = PAGE_TITLES[pathname] ?? 'TechTransit';
+  const { pathname }    = useLocation();
+  const navigate        = useNavigate();
+  const user            = useAuthStore((s) => s.user);
+  const title           = PAGE_TITLES[pathname] ?? 'TechTransit';
+  const [count, setCount] = useState(0);
+
+  useEffect(() => {
+    notificacionesApi.conteo().then(setCount).catch(() => {});
+    // Refresca el conteo cada 2 minutos
+    const id = setInterval(() => notificacionesApi.conteo().then(setCount).catch(() => {}), 120_000);
+    return () => clearInterval(id);
+  }, []);
 
   return (
     <div style={{ position: 'relative', display: 'flex', height: '100svh', width: '100vw', overflow: 'hidden', background: 'var(--bg-base)' }}>
@@ -41,18 +52,35 @@ export function AppLayout() {
 
           <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--gap-md)' }}>
             {/* Notificaciones */}
-            <button style={{
-              position: 'relative',
-              width: 36, height: 36,
-              display: 'flex', alignItems: 'center', justifyContent: 'center',
-              borderRadius: 'var(--radius-md)',
-              border: '1px solid var(--glass-border)',
-              background: 'var(--glass-xs)',
-              cursor: 'pointer',
-              flexShrink: 0,
-            }}>
-              <Bell size={15} style={{ color: 'var(--text-secondary)' }} />
-              <span style={{ position: 'absolute', top: 8, right: 8, width: 6, height: 6, borderRadius: '50%', background: 'var(--primary)', boxShadow: '0 0 6px var(--primary)' }} />
+            <button
+              onClick={() => navigate('/notificaciones')}
+              style={{
+                position: 'relative',
+                width: 36, height: 36,
+                display: 'flex', alignItems: 'center', justifyContent: 'center',
+                borderRadius: 'var(--radius-md)',
+                border: `1px solid ${count > 0 ? 'rgba(239,68,68,0.35)' : 'var(--glass-border)'}`,
+                background: count > 0 ? 'rgba(239,68,68,0.10)' : 'var(--glass-xs)',
+                cursor: 'pointer',
+                flexShrink: 0,
+                transition: 'border-color 200ms, background 200ms',
+              }}
+            >
+              <Bell size={15} style={{ color: count > 0 ? 'var(--rojo)' : 'var(--text-secondary)' }} />
+              {count > 0 && (
+                <span style={{
+                  position: 'absolute', top: -4, right: -4,
+                  minWidth: 16, height: 16, borderRadius: 8,
+                  background: 'var(--rojo)',
+                  color: '#fff',
+                  fontSize: 10, fontWeight: 700,
+                  display: 'flex', alignItems: 'center', justifyContent: 'center',
+                  padding: '0 3px',
+                  boxShadow: '0 0 8px rgba(239,68,68,0.6)',
+                }}>
+                  {count > 99 ? '99+' : count}
+                </span>
+              )}
             </button>
 
             {/* Avatar */}

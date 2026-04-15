@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import { Plus, RefreshCw, X, ChevronRight, User, Building2, Calendar, DollarSign, Tag, FileText } from 'lucide-react';
 import { procesosApi, type Proceso, type EstadoProceso, type CreateProcesoPayload } from '../lib/api.procesos';
 import { api } from '../lib/api';
@@ -73,7 +73,7 @@ export function PrecontractualPage() {
   const user     = useAuthStore((s) => s.user);
   const canWrite = user?.rol === 'ADMIN' || user?.rol === 'SUPERVISOR';
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     setError('');
     try {
@@ -87,9 +87,9 @@ export function PrecontractualPage() {
     } finally {
       setLoading(false);
     }
-  };
+  }, [filterEstado]);
 
-  useEffect(() => { load(); }, [filterEstado]);
+  useEffect(() => { load(); }, [load]);
 
   const handleMover = async (id: string, estado: EstadoProceso) => {
     setMovingId(id);

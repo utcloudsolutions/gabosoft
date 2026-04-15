@@ -1,4 +1,4 @@
-import { useEffect, useState, useRef } from 'react';
+import { useCallback, useEffect, useState, useRef } from 'react';
 import {
   Plus, RefreshCw, X, CheckCircle2, Circle, Clock, AlertCircle,
   Building2, User, Calendar, DollarSign, ChevronRight, Pencil, Trash2,
@@ -66,7 +66,7 @@ export function ContratosPage() {
   const user     = useAuthStore((s) => s.user);
   const canWrite = user?.rol === 'ADMIN' || user?.rol === 'SUPERVISOR';
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true); setError('');
     try {
       const res = await contratosApi.list({
@@ -77,9 +77,9 @@ export function ContratosPage() {
       setTotal(res.total);
     } catch { setError('No se pudo cargar los contratos.'); }
     finally { setLoading(false); }
-  };
+  }, [filterSemaforo]);
 
-  useEffect(() => { load(); }, [filterSemaforo]);
+  useEffect(() => { load(); }, [load]);
 
   const handleSaved = (c: Contrato) => {
     setContratos((prev) => {

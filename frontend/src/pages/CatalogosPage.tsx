@@ -1,4 +1,4 @@
-import { useEffect, useRef, useState } from 'react';
+import { useCallback, useEffect, useRef, useState } from 'react';
 import { Plus, RefreshCw, X, Pencil, PowerOff, Building2, Users2, Phone, Mail } from 'lucide-react';
 import {
   entidadesApi, aliadosApi,
@@ -75,13 +75,13 @@ function EntidadesTab() {
   const user     = useAuthStore((s) => s.user);
   const canWrite = user?.rol === 'ADMIN' || user?.rol === 'SUPERVISOR';
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try { setItems(await entidadesApi.list(!showTodas)); }
     finally { setLoading(false); }
-  };
+  }, [showTodas]);
 
-  useEffect(() => { load(); }, [showTodas]);
+  useEffect(() => { load(); }, [load]);
 
   const handleSaved = (e: Entidad) => {
     setItems((prev) => {
@@ -218,13 +218,13 @@ function AliadosTab() {
   const user     = useAuthStore((s) => s.user);
   const canWrite = user?.rol === 'ADMIN' || user?.rol === 'SUPERVISOR';
 
-  const load = async () => {
+  const load = useCallback(async () => {
     setLoading(true);
     try { setItems(await aliadosApi.list(!showTodos)); }
     finally { setLoading(false); }
-  };
+  }, [showTodos]);
 
-  useEffect(() => { load(); }, [showTodos]);
+  useEffect(() => { load(); }, [load]);
 
   const handleSaved = (a: Aliado) => {
     setItems((prev) => {

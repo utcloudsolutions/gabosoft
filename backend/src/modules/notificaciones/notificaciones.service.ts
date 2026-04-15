@@ -65,7 +65,6 @@ export async function getNotificaciones(): Promise<Notificacion[]> {
   ]);
 
   const resultado: Notificacion[] = [];
-  let seq = 0;
 
   // ── Contratos en rojo ────────────────────────────────────────────────────────
   for (const c of contratosRojo) {
@@ -82,7 +81,6 @@ export async function getNotificaciones(): Promise<Notificacion[]> {
       enlace:      '/contratos',
       fecha:       c.fechaFin.toISOString(),
     });
-    seq++;
   }
 
   // ── Contratos próximos a vencer ───────────────────────────────────────────────
@@ -98,7 +96,6 @@ export async function getNotificaciones(): Promise<Notificacion[]> {
       enlace:      '/contratos',
       fecha:       c.fechaFin.toISOString(),
     });
-    seq++;
   }
 
   // ── Hitos vencidos ────────────────────────────────────────────────────────────
@@ -114,7 +111,6 @@ export async function getNotificaciones(): Promise<Notificacion[]> {
       enlace:      '/contratos',
       fecha:       h.fechaLimite.toISOString(),
     });
-    seq++;
   }
 
   // ── Procesos próximos a cierre ────────────────────────────────────────────────
@@ -130,7 +126,6 @@ export async function getNotificaciones(): Promise<Notificacion[]> {
       enlace:      '/precontractual',
       fecha:       p.fechaCierre!.toISOString(),
     });
-    seq++;
   }
 
   // Ordenar: danger primero, luego por fecha

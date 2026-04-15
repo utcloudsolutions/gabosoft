@@ -10,6 +10,8 @@ import procesosRouter from './modules/procesos/procesos.router';
 import entidadesRouter from './modules/entidades/entidades.router';
 import aliadosRouter from './modules/aliados/aliados.router';
 import usuariosRouter from './modules/usuarios/usuarios.router';
+import contratosRouter from './modules/contratos/contratos.router';
+import notificacionesRouter from './modules/notificaciones/notificaciones.router';
 
 const app = express();
 
@@ -39,6 +41,8 @@ app.use('/api/v1/procesos',   procesosRouter);
 app.use('/api/v1/entidades',  entidadesRouter);
 app.use('/api/v1/aliados',    aliadosRouter);
 app.use('/api/v1/usuarios',   usuariosRouter);
+app.use('/api/v1/contratos',       contratosRouter);
+app.use('/api/v1/notificaciones',  notificacionesRouter);
 
 // ── Global error handler (debe ir al final) ────────────────────────────────────
 app.use(errorHandler);

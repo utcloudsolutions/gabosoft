@@ -1,6 +1,7 @@
 import bcrypt from 'bcrypt';
 import { prisma } from '../../db/prisma';
 import { createError } from '../../middleware/error';
+import { paginate, type PaginationParams } from '../../lib/pagination';
 import type { z } from 'zod';
 import type { createUsuarioSchema, updateUsuarioSchema } from './usuarios.schemas';
 
@@ -17,11 +18,20 @@ const SAFE_SELECT = {
   updatedAt: true,
 };
 
-export async function listUsuarios() {
-  return prisma.usuario.findMany({
-    select: SAFE_SELECT,
-    orderBy: { nombre: 'asc' },
-  });
+export async function listUsuarios(pagination: PaginationParams) {
+  const { page, limit } = pagination;
+
+  const [items, total] = await Promise.all([
+    prisma.usuario.findMany({
+      select: SAFE_SELECT,
+      orderBy: { nombre: 'asc' },
+      skip: (page - 1) * limit,
+      take: limit,
+    }),
+    prisma.usuario.count(),
+  ]);
+
+  return paginate(items, total, page, limit);
 }
 
 export async function getUsuario(id: string) {

@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { requireAuth } from '../../middleware/auth';
 import { requireRoles } from '../../middleware/roles';
+import { paginationSchema } from '../../lib/pagination';
 import { createAliadoSchema, updateAliadoSchema } from './aliados.schemas';
 import { listAliados, getAliado, createAliado, updateAliado, deleteAliado } from './aliados.service';
 
@@ -10,7 +11,8 @@ router.use(requireAuth);
 router.get('/', async (req, res, next) => {
   try {
     const soloActivos = req.query.todos !== 'true';
-    res.json(await listAliados(soloActivos));
+    const pagination  = paginationSchema.parse(req.query);
+    res.json(await listAliados(soloActivos, pagination));
   } catch (err) {
     next(err);
   }

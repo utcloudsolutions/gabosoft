@@ -1,6 +1,7 @@
 import { Router } from 'express';
 import { requireAuth } from '../../middleware/auth';
 import { requireRoles } from '../../middleware/roles';
+import { paginationSchema } from '../../lib/pagination';
 import { createUsuarioSchema, updateUsuarioSchema } from './usuarios.schemas';
 import {
   listUsuarios,
@@ -15,9 +16,10 @@ const router = Router();
 // Todos los endpoints de usuarios son solo para ADMIN
 router.use(requireAuth, requireRoles('ADMIN'));
 
-router.get('/', async (_req, res, next) => {
+router.get('/', async (req, res, next) => {
   try {
-    res.json(await listUsuarios());
+    const pagination = paginationSchema.parse(req.query);
+    res.json(await listUsuarios(pagination));
   } catch (err) {
     next(err);
   }

@@ -68,6 +68,7 @@ function TabBtn({ active, icon, label, onClick }: {
 // ═══════════════════════════════════════════════════════════════════════════════
 function EntidadesTab() {
   const [items,      setItems]      = useState<Entidad[]>([]);
+  const [total,      setTotal]      = useState(0);
   const [loading,    setLoading]    = useState(true);
   const [showTodas,  setShowTodas]  = useState(false);
   const [showModal,  setShowModal]  = useState(false);
@@ -77,8 +78,11 @@ function EntidadesTab() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    try { setItems(await entidadesApi.list(!showTodas)); }
-    finally { setLoading(false); }
+    try {
+      const res = await entidadesApi.list(!showTodas);
+      setItems(res.items);
+      setTotal(res.total);
+    } finally { setLoading(false); }
   }, [showTodas]);
 
   useEffect(() => { load(); }, [load]);
@@ -103,7 +107,7 @@ function EntidadesTab() {
       {/* Toolbar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--gap-md)' }}>
-          <p style={{ color: 'var(--text-muted)', fontSize: 12 }}>{items.length} entidad{items.length !== 1 ? 'es' : ''}</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: 12 }}>{total} entidad{total !== 1 ? 'es' : ''}</p>
           <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--gap-sm)', cursor: 'pointer' }}>
             <input
               type="checkbox"
@@ -211,6 +215,7 @@ function EntidadesTab() {
 // ═══════════════════════════════════════════════════════════════════════════════
 function AliadosTab() {
   const [items,     setItems]     = useState<Aliado[]>([]);
+  const [total,     setTotal]     = useState(0);
   const [loading,   setLoading]   = useState(true);
   const [showTodos, setShowTodos] = useState(false);
   const [showModal, setShowModal] = useState(false);
@@ -220,8 +225,11 @@ function AliadosTab() {
 
   const load = useCallback(async () => {
     setLoading(true);
-    try { setItems(await aliadosApi.list(!showTodos)); }
-    finally { setLoading(false); }
+    try {
+      const res = await aliadosApi.list(!showTodos);
+      setItems(res.items);
+      setTotal(res.total);
+    } finally { setLoading(false); }
   }, [showTodos]);
 
   useEffect(() => { load(); }, [load]);
@@ -246,7 +254,7 @@ function AliadosTab() {
       {/* Toolbar */}
       <div style={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', flexShrink: 0 }}>
         <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--gap-md)' }}>
-          <p style={{ color: 'var(--text-muted)', fontSize: 12 }}>{items.length} aliado{items.length !== 1 ? 's' : ''}</p>
+          <p style={{ color: 'var(--text-muted)', fontSize: 12 }}>{total} aliado{total !== 1 ? 's' : ''}</p>
           <label style={{ display: 'flex', alignItems: 'center', gap: 'var(--gap-sm)', cursor: 'pointer' }}>
             <input
               type="checkbox"

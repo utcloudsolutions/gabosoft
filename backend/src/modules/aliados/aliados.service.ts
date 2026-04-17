@@ -1,13 +1,24 @@
 import { prisma } from '../../db/prisma';
 import { createError } from '../../middleware/error';
+import { paginate, type PaginationParams } from '../../lib/pagination';
 import type { z } from 'zod';
 import type { createAliadoSchema, updateAliadoSchema } from './aliados.schemas';
 
-export async function listAliados(soloActivos = true) {
-  return prisma.aliado.findMany({
-    where: soloActivos ? { activo: true } : undefined,
-    orderBy: { nombre: 'asc' },
-  });
+export async function listAliados(soloActivos = true, pagination: PaginationParams) {
+  const { page, limit } = pagination;
+  const where = soloActivos ? { activo: true } : undefined;
+
+  const [items, total] = await Promise.all([
+    prisma.aliado.findMany({
+      where,
+      orderBy: { nombre: 'asc' },
+      skip: (page - 1) * limit,
+      take: limit,
+    }),
+    prisma.aliado.count({ where }),
+  ]);
+
+  return paginate(items, total, page, limit);
 }
 
 export async function getAliado(id: string) {

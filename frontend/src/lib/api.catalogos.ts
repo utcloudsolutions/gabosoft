@@ -1,5 +1,14 @@
 import { api } from './api';
 
+// ── Paginación ────────────────────────────────────────────────────────────────
+export interface PaginatedResponse<T> {
+  items: T[];
+  total: number;
+  page:  number;
+  limit: number;
+  pages: number;
+}
+
 // ── Entidades ─────────────────────────────────────────────────────────────────
 export interface Entidad {
   id:               string;
@@ -61,7 +70,7 @@ export interface UpdateAliadoPayload extends Partial<CreateAliadoPayload> {
 // ── API ───────────────────────────────────────────────────────────────────────
 export const entidadesApi = {
   list: (todas = false) =>
-    api.get<Entidad[]>('/entidades', { params: todas ? { todas: 'true' } : {} }).then((r) => r.data),
+    api.get<PaginatedResponse<Entidad>>('/entidades', { params: todas ? { todas: 'true' } : {} }).then((r) => r.data),
   create: (payload: CreateEntidadPayload) =>
     api.post<Entidad>('/entidades', payload).then((r) => r.data),
   update: (id: string, payload: UpdateEntidadPayload) =>
@@ -72,7 +81,7 @@ export const entidadesApi = {
 
 export const aliadosApi = {
   list: (todos = false) =>
-    api.get<Aliado[]>('/aliados', { params: todos ? { todos: 'true' } : {} }).then((r) => r.data),
+    api.get<PaginatedResponse<Aliado>>('/aliados', { params: todos ? { todos: 'true' } : {} }).then((r) => r.data),
   create: (payload: CreateAliadoPayload) =>
     api.post<Aliado>('/aliados', payload).then((r) => r.data),
   update: (id: string, payload: UpdateAliadoPayload) =>

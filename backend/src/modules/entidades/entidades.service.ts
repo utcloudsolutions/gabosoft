@@ -1,13 +1,24 @@
 import { prisma } from '../../db/prisma';
 import { createError } from '../../middleware/error';
+import { paginate, type PaginationParams } from '../../lib/pagination';
 import type { z } from 'zod';
 import type { createEntidadSchema, updateEntidadSchema } from './entidades.schemas';
 
-export async function listEntidades(soloActivas = true) {
-  return prisma.entidad.findMany({
-    where: soloActivas ? { activo: true } : undefined,
-    orderBy: { nombre: 'asc' },
-  });
+export async function listEntidades(soloActivas = true, pagination: PaginationParams) {
+  const { page, limit } = pagination;
+  const where = soloActivas ? { activo: true } : undefined;
+
+  const [items, total] = await Promise.all([
+    prisma.entidad.findMany({
+      where,
+      orderBy: { nombre: 'asc' },
+      skip: (page - 1) * limit,
+      take: limit,
+    }),
+    prisma.entidad.count({ where }),
+  ]);
+
+  return paginate(items, total, page, limit);
 }
 
 export async function getEntidad(id: string) {
@@ -37,6 +48,5 @@ export async function updateEntidad(id: string, data: z.infer<typeof updateEntid
 export async function deleteEntidad(id: string) {
   const exists = await prisma.entidad.findUnique({ where: { id } });
   if (!exists) throw createError('Entidad no encontrada', 404);
-  // Soft delete
   return prisma.entidad.update({ where: { id }, data: { activo: false } });
 }

@@ -1,8 +1,12 @@
 import axios from 'axios';
 import { tokenStorage } from './tokenStorage';
 
+// En producción (Render) se inyecta VITE_API_BASE_URL apuntando al backend.
+// En desarrollo el proxy de Vite reenvía /api → http://localhost:4000.
+const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '/api/v1';
+
 export const api = axios.create({
-  baseURL: '/api/v1',
+  baseURL: BASE_URL,
   headers: { 'Content-Type': 'application/json' },
 });
 
@@ -46,7 +50,7 @@ api.interceptors.response.use(
     refreshing = true;
 
     try {
-      const { data } = await axios.post('/api/v1/auth/refresh', { refreshToken });
+      const { data } = await axios.post(`${BASE_URL}/auth/refresh`, { refreshToken });
       tokenStorage.set(data.accessToken, data.refreshToken);
       api.defaults.headers.common.Authorization = `Bearer ${data.accessToken}`;
       queue.forEach((cb) => cb(data.accessToken));

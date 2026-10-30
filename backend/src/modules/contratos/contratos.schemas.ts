@@ -7,8 +7,8 @@ export const createContratoSchema = z.object({
   numeroContrato:   z.string().min(1).max(100),
   objeto:           z.string().min(3).max(2000),
   valorTotal:       z.number().positive(),
-  fechaInicio:      z.string().date(),
-  fechaFin:         z.string().date(),
+  fechaInicio:      z.iso.date(),
+  fechaFin:         z.iso.date(),
   supervisorNombre: z.string().max(200).optional(),
   supervisorEmail:  z.email().optional(),
   notas:            z.string().max(5000).optional(),
@@ -17,7 +17,7 @@ export const createContratoSchema = z.object({
 export const updateContratoSchema = createContratoSchema.partial().extend({
   valorEjecutado: z.number().min(0).optional(),
   avanceFisico:   z.number().min(0).max(100).optional(),
-  fechaFinReal:   z.string().date().optional(),
+  fechaFinReal:   z.iso.date().optional(),
   activo:         z.boolean().optional(),
 });
 
@@ -39,12 +39,12 @@ export const listContratosSchema = z.object({
 export const createHitoSchema = z.object({
   nombre:       z.string().min(2).max(300),
   descripcion:  z.string().max(1000).optional(),
-  fechaLimite:  z.string().date(),
+  fechaLimite:  z.iso.date(),
   valorAsociado: z.number().positive().optional(),
   observaciones: z.string().max(1000).optional(),
 });
 
 export const updateHitoSchema = createHitoSchema.partial().extend({
   estado:           z.enum(['PENDIENTE', 'EN_PROGRESO', 'COMPLETADO', 'VENCIDO']).optional(),
-  fechaCumplimiento: z.string().date().optional(),
+  fechaCumplimiento: z.iso.date().optional(),
 });

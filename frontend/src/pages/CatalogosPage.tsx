@@ -564,7 +564,7 @@ function AliadoModal({ aliado, onClose, onSaved }: {
 
 // ── Shared UI ─────────────────────────────────────────────────────────────────
 function ModalOverlay({ overlayRef, onClose, children }: {
-  overlayRef: React.RefObject<HTMLDivElement>;
+  overlayRef: React.RefObject<HTMLDivElement | null>;
   onClose: () => void;
   children: React.ReactNode;
 }) {

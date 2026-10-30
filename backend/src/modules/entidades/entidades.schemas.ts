@@ -7,7 +7,7 @@ export const createEntidadSchema = z.object({
   municipio: z.string().max(100).optional(),
   departamento: z.string().max(100).optional(),
   contactoNombre: z.string().max(200).optional(),
-  contactoEmail: z.string().email().optional(),
+  contactoEmail: z.email().optional(),
   contactoTelefono: z.string().max(30).optional(),
 });
 

@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { ZodError } from 'zod';
+import { z, ZodError } from 'zod';
 
 export interface AppError extends Error {
   statusCode?: number;
@@ -14,7 +14,7 @@ export function errorHandler(
   if (err instanceof ZodError) {
     res.status(400).json({
       message: 'Datos de entrada inválidos',
-      errors: err.flatten().fieldErrors,
+      errors: z.flattenError(err).fieldErrors,
     });
     return;
   }

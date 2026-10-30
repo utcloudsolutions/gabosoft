@@ -4,7 +4,7 @@ import 'dotenv/config';
 const envSchema = z.object({
   PORT: z.coerce.number().default(4000),
   NODE_ENV: z.enum(['development', 'production', 'test']).default('development'),
-  FRONTEND_URL: z.string().url().default('http://localhost:3000'),
+  FRONTEND_URL: z.url().default('http://localhost:3000'),
   DATABASE_URL: z.string().min(1),
   JWT_ACCESS_SECRET: z.string().min(32),
   JWT_REFRESH_SECRET: z.string().min(32),
@@ -16,7 +16,7 @@ const envSchema = z.object({
 const parsed = envSchema.safeParse(process.env);
 
 if (!parsed.success) {
-  console.error('❌ Variables de entorno inválidas:', parsed.error.flatten().fieldErrors);
+  console.error('❌ Variables de entorno inválidas:', z.flattenError(parsed.error).fieldErrors);
   process.exit(1);
 }
 

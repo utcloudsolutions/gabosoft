@@ -12,9 +12,12 @@ export function errorHandler(
   _next: NextFunction,
 ): void {
   if (err instanceof ZodError) {
+    const { fieldErrors, formErrors } = z.flattenError(err);
     res.status(400).json({
       message: 'Datos de entrada inválidos',
-      errors: z.flattenError(err).fieldErrors,
+      errors: fieldErrors,
+      // Errores a nivel raíz, p. ej. body ausente (en Express 5 req.body es undefined)
+      ...(formErrors.length > 0 && { formErrors }),
     });
     return;
   }

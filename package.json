@@ -17,7 +17,7 @@
     "format:check": "prettier --check \"**/*.{ts,tsx,json}\" --ignore-path .gitignore"
   },
   "devDependencies": {
-    "prettier": "^3.3.3"
+    "prettier": "^3.9.10"
   },
   "engines": {
     "node": ">=24"

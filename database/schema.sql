@@ -1,6 +1,7 @@
 -- ============================================================
 -- TechTransit — Schema PostgreSQL v1.0
--- Ejecutar en Supabase SQL Editor o via psql
+-- ⚠ HISTÓRICO: no coincide con la BD real. La fuente de verdad es
+--   backend/prisma/schema.prisma + backend/prisma/migrations/.
 -- ============================================================
 
 -- Extensions

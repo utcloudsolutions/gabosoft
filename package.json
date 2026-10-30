@@ -7,6 +7,10 @@
     "backend"
   ],
   "scripts": {
+    "db:up": "docker compose up -d --wait db",
+    "db:down": "docker compose down",
+    "db:logs": "docker compose logs -f db",
+    "db:reset": "docker compose down -v && docker compose up -d --wait db",
     "lint": "npm run lint -w backend -w frontend",
     "build": "npm run build -w backend -w frontend",
     "format": "prettier --write \"**/*.{ts,tsx,json}\" --ignore-path .gitignore",
@@ -14,5 +18,8 @@
   },
   "devDependencies": {
     "prettier": "^3.3.3"
+  },
+  "engines": {
+    "node": ">=24"
   }
 }

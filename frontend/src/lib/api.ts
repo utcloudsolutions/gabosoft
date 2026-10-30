@@ -3,7 +3,7 @@ import { tokenStorage } from './tokenStorage';
 
 // En producción (Render) se inyecta VITE_API_BASE_URL apuntando al backend.
 // En desarrollo el proxy de Vite reenvía /api → http://localhost:4000.
-const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '/api/v1';
+const BASE_URL = import.meta.env.VITE_API_BASE_URL || '/api/v1';
 
 export const api = axios.create({
   baseURL: BASE_URL,

@@ -22,9 +22,9 @@ services:
         sync: false
       - key: JWT_REFRESH_SECRET
         sync: false
-      - key: JWT_ACCESS_EXPIRES_IN
+      - key: JWT_ACCESS_EXPIRY
         value: 15m
-      - key: JWT_REFRESH_EXPIRES_IN
+      - key: JWT_REFRESH_EXPIRY
         value: 7d
       # URL del frontend (para CORS) — completar tras crear el Static Site
       - key: FRONTEND_URL

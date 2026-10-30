@@ -5,10 +5,13 @@ import tailwindcss from '@tailwindcss/vite';
 export default defineConfig({
   plugins: [tailwindcss(), react()],
   server: {
-    port: 3000,
+    // Puerto configurable (p. ej. VITE_PORT=3100) si el 3000 está ocupado.
+    // strictPort evita que Vite cambie de puerto en silencio y rompa CORS.
+    port: Number(process.env.VITE_PORT) || 3000,
+    strictPort: true,
     proxy: {
       '/api': {
-        target: 'http://localhost:4000',
+        target: process.env.VITE_API_PROXY_TARGET || 'http://localhost:4000',
         changeOrigin: true,
       },
     },

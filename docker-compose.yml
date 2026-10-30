@@ -1,0 +1,29 @@
+# Entorno de desarrollo local — solo la base de datos.
+# Ver docs/DESARROLLO.md para la guía completa.
+name: techtransit
+
+services:
+  db:
+    image: postgres:17-alpine
+    container_name: techtransit-db
+    restart: unless-stopped
+    environment:
+      POSTGRES_USER: ${DB_USER:-techtransit}
+      POSTGRES_PASSWORD: ${DB_PASSWORD:-techtransit}
+      POSTGRES_DB: ${DB_NAME:-techtransit}
+      TZ: America/Bogota
+      PGTZ: America/Bogota
+    ports:
+      # 5433 en el host para no chocar con otros Postgres locales
+      - '${DB_PORT:-5433}:5432'
+    volumes:
+      - pgdata:/var/lib/postgresql/data
+    healthcheck:
+      test: ['CMD-SHELL', 'pg_isready -U $${POSTGRES_USER} -d $${POSTGRES_DB}']
+      interval: 5s
+      timeout: 5s
+      retries: 10
+
+volumes:
+  pgdata:
+    name: techtransit_pgdata

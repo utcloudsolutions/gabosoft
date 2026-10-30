@@ -1,4 +1,4 @@
-import { EstadoProceso } from '@prisma/client';
+import { EstadoProceso } from '../../generated/prisma/client';
 import { prisma } from '../../db/prisma';
 import { createError } from '../../middleware/error';
 import type { z } from 'zod';

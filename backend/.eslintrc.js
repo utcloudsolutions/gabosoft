@@ -9,7 +9,7 @@ module.exports = {
   plugins: ['@typescript-eslint'],
   extends: ['plugin:@typescript-eslint/recommended'],
   env: { node: true, jest: true },
-  ignorePatterns: ['.eslintrc.js', 'dist/'],
+  ignorePatterns: ['.eslintrc.js', 'dist/', 'src/generated/'],
   rules: {
     '@typescript-eslint/interface-name-prefix': 'off',
     '@typescript-eslint/explicit-function-return-type': 'off',

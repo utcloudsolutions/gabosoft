@@ -1,4 +1,4 @@
-import { SemaforoContrato } from '@prisma/client';
+import { SemaforoContrato } from '../../generated/prisma/client';
 import { prisma } from '../../db/prisma';
 import { createError } from '../../middleware/error';
 import type { z } from 'zod';

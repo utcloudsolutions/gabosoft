@@ -1,5 +1,5 @@
 import { Request, Response, NextFunction } from 'express';
-import { RolUsuario } from '@prisma/client';
+import { RolUsuario } from '../generated/prisma/client';
 
 /**
  * Middleware factory que permite el acceso solo a los roles indicados.

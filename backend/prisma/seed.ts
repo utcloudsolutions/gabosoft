@@ -1,7 +1,11 @@
-import { PrismaClient } from '@prisma/client';
+import 'dotenv/config';
+import { PrismaPg } from '@prisma/adapter-pg';
 import bcrypt from 'bcrypt';
+import { PrismaClient } from '../src/generated/prisma/client';
 
-const prisma = new PrismaClient();
+const prisma = new PrismaClient({
+  adapter: new PrismaPg({ connectionString: process.env.DATABASE_URL }),
+});
 
 const DEV_USERS = [
   { nombre: 'Admin Dev',       email: 'admin@techtransit.dev',       password: 'Admin1234!',  rol: 'ADMIN'       as const },

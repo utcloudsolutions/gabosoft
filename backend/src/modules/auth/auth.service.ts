@@ -1,6 +1,6 @@
 import bcrypt from 'bcrypt';
 import jwt from 'jsonwebtoken';
-import { RolUsuario } from '@prisma/client';
+import { RolUsuario } from '../../generated/prisma/client';
 import { prisma } from '../../db/prisma';
 import { env } from '../../config/env';
 import { createError } from '../../middleware/error';

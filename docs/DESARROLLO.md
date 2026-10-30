@@ -235,7 +235,7 @@ techtransit/
 |---|---|---|
 | Desarrollo local | Postgres 17 en Docker | `backend/.env` (este documento) |
 | CI (GitHub Actions) | No usa BD (genera cliente Prisma + lint + build) | `.github/workflows/ci.yml` |
-| Producción | Supabase (PostgreSQL) | Variables en el dashboard de Render (`render.yaml`) |
+| Producción | Servidor on-premise (por definir) | Pendiente. `render.yaml` y Supabase son históricos y ya no se usan |
 
 ---
 

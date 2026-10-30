@@ -1,4 +1,5 @@
 import { prisma } from '../../db/prisma';
+import { diasHasta, hoyFecha, sumarDias } from '../../lib/fechas';
 
 export type Severidad = 'danger' | 'warning' | 'info';
 
@@ -13,14 +14,11 @@ export interface Notificacion {
   fecha:       string;
 }
 
-function diasRestantes(fecha: Date): number {
-  return Math.ceil((fecha.getTime() - Date.now()) / (1000 * 60 * 60 * 24));
-}
 
 export async function getNotificaciones(): Promise<Notificacion[]> {
-  const hoy       = new Date();
-  const en30dias  = new Date(Date.now() + 30 * 24 * 60 * 60 * 1000);
-  const en15dias  = new Date(Date.now() + 15 * 24 * 60 * 60 * 1000);
+  const hoy       = hoyFecha();
+  const en30dias  = sumarDias(hoy, 30);
+  const en15dias  = sumarDias(hoy, 15);
 
   const [contratosRojo, contratosVencen, hitosVencidos, procesosVencen] = await Promise.all([
     // Contratos con semáforo ROJO activos
@@ -68,7 +66,7 @@ export async function getNotificaciones(): Promise<Notificacion[]> {
 
   // ── Contratos en rojo ────────────────────────────────────────────────────────
   for (const c of contratosRojo) {
-    const dias = diasRestantes(c.fechaFin);
+    const dias = diasHasta(c.fechaFin);
     resultado.push({
       id:          `contrato-rojo-${c.id}`,
       tipo:        'Contrato en riesgo',
@@ -85,7 +83,7 @@ export async function getNotificaciones(): Promise<Notificacion[]> {
 
   // ── Contratos próximos a vencer ───────────────────────────────────────────────
   for (const c of contratosVencen) {
-    const dias = diasRestantes(c.fechaFin);
+    const dias = diasHasta(c.fechaFin);
     resultado.push({
       id:          `contrato-vence-${c.id}`,
       tipo:        'Contrato por vencer',
@@ -100,7 +98,7 @@ export async function getNotificaciones(): Promise<Notificacion[]> {
 
   // ── Hitos vencidos ────────────────────────────────────────────────────────────
   for (const h of hitosVencidos) {
-    const dias = diasRestantes(h.fechaLimite);
+    const dias = diasHasta(h.fechaLimite);
     resultado.push({
       id:          `hito-vencido-${h.id}`,
       tipo:        'Hito vencido',
@@ -115,7 +113,7 @@ export async function getNotificaciones(): Promise<Notificacion[]> {
 
   // ── Procesos próximos a cierre ────────────────────────────────────────────────
   for (const p of procesosVencen) {
-    const dias = diasRestantes(p.fechaCierre!);
+    const dias = diasHasta(p.fechaCierre!);
     resultado.push({
       id:          `proceso-cierre-${p.id}`,
       tipo:        'Proceso por cerrar',

@@ -8,18 +8,13 @@ import { api } from '../lib/api';
 import { SemaforoBadge } from '../components/ui/SemaforoBadge';
 import { Select, type SelectOption } from '../components/ui/Select';
 import { useAuthStore } from '../store/authStore';
+import { diasHasta, fmtFecha } from '../lib/fechas';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function fmtCOP(val: number) {
   if (val >= 1_000_000_000) return `$${(val / 1_000_000_000).toFixed(2)}B`;
   if (val >= 1_000_000)     return `$${(val / 1_000_000).toFixed(0)}M`;
   return `$${val.toLocaleString('es-CO')}`;
-}
-function fmtFecha(s: string) {
-  return new Date(s).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' });
-}
-function diasRestantes(fechaFin: string) {
-  return Math.ceil((new Date(fechaFin).getTime() - Date.now()) / (1000 * 60 * 60 * 24));
 }
 
 const SEMAFORO_OPTIONS: SelectOption[] = [
@@ -216,7 +211,7 @@ function ContratoRow({ contrato: c, isActive, canWrite, onClick, onEdit, onSemaf
   onEdit: () => void;
   onSemaforoChange: (id: string, s: SemaforoContrato) => void;
 }) {
-  const dias     = diasRestantes(c.fechaFin);
+  const dias     = diasHasta(c.fechaFin);
   const pctFin   = Math.min(Number(c.avanceFisico), 100);
   const barColor = c.semaforo === 'VERDE' ? 'var(--verde)' : c.semaforo === 'AMARILLO' ? 'var(--amarillo)' : 'var(--rojo)';
 
@@ -440,7 +435,7 @@ function HitoItem({ hito, isLast, canWrite, onEdit, onDelete, onEstadoChange }: 
 }) {
   const cfg  = HITO_ESTADO_CFG[hito.estado];
   const Icon = cfg.Icon;
-  const vencido = hito.estado !== 'COMPLETADO' && new Date(hito.fechaLimite) < new Date();
+  const vencido = hito.estado !== 'COMPLETADO' && diasHasta(hito.fechaLimite) < 0;
 
   const ESTADOS_NEXT: Record<EstadoHito, EstadoHito | null> = {
     PENDIENTE:   'EN_PROGRESO',

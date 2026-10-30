@@ -1,6 +1,7 @@
 import { SemaforoContrato } from '../../generated/prisma/client';
 import { prisma } from '../../db/prisma';
 import { createError } from '../../middleware/error';
+import { diasEntre, hoyFecha } from '../../lib/fechas';
 import type { z } from 'zod';
 import type {
   createContratoSchema,
@@ -28,17 +29,17 @@ export function calcularSemaforo(
   // Si ya terminó en tiempo → VERDE
   if (fechaFinReal && fechaFinReal <= fechaFin) return 'VERDE';
 
-  const hoy       = new Date();
+  const hoy       = hoyFecha();
   const fin       = fechaFin;
-  const diasTotal = Math.ceil((fin.getTime() - hoy.getTime()) / (1000 * 60 * 60 * 24));
+  const diasTotal = diasEntre(hoy, fin);
 
   // Vencido
   if (hoy > fin && !fechaFinReal) return 'ROJO';
 
   // Avance físico vs tiempo transcurrido
-  const inicioEjercicio   = new Date(fin.getFullYear(), 0, 1);
-  const tiempoTotalDias   = Math.ceil((fin.getTime() - inicioEjercicio.getTime()) / (1000 * 60 * 60 * 24));
-  const tiempoElapsedDias = Math.ceil((hoy.getTime()  - inicioEjercicio.getTime()) / (1000 * 60 * 60 * 24));
+  const inicioEjercicio   = new Date(Date.UTC(fin.getUTCFullYear(), 0, 1));
+  const tiempoTotalDias   = diasEntre(inicioEjercicio, fin);
+  const tiempoElapsedDias = diasEntre(inicioEjercicio, hoy);
   const avanceEsperado    = tiempoTotalDias > 0 ? (tiempoElapsedDias / tiempoTotalDias) * 100 : 0;
   const brecha            = avanceEsperado - avanceFisico;
 

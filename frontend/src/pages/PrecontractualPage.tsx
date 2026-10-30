@@ -4,6 +4,7 @@ import { procesosApi, type Proceso, type EstadoProceso, type CreateProcesoPayloa
 import { api } from '../lib/api';
 import { Select, type SelectOption } from '../components/ui/Select';
 import { useAuthStore } from '../store/authStore';
+import { fmtFecha } from '../lib/fechas';
 
 // ── Columnas del Kanban ────────────────────────────────────────────────────────
 const COLUMNS: { estado: EstadoProceso; label: string; color: string; glow: string }[] = [
@@ -35,9 +36,6 @@ function fmtCOP(val: number) {
   return `$${val.toLocaleString('es-CO')}`;
 }
 
-function fmtFecha(s: string) {
-  return new Date(s).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' });
-}
 
 // ── Hook: entidades y usuarios para selects ───────────────────────────────────
 function useSelects() {

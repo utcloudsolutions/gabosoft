@@ -1,4 +1,5 @@
 import { prisma } from '../../db/prisma';
+import { hoyFecha, sumarDias } from '../../lib/fechas';
 
 export async function getKpis() {
   const [
@@ -25,8 +26,8 @@ export async function getKpis() {
       where: {
         estado: { in: ['ESTRUCTURACION', 'PRESENTACION'] },
         fechaCierre: {
-          gte: new Date(),
-          lte: new Date(Date.now() + 30 * 24 * 60 * 60 * 1000),
+          gte: hoyFecha(),
+          lte: sumarDias(hoyFecha(), 30),
         },
       },
     }),

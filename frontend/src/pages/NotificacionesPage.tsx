@@ -2,6 +2,7 @@ import { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { AlertTriangle, AlertCircle, Info, RefreshCw, Bell, ChevronRight } from 'lucide-react';
 import { notificacionesApi, type Notificacion, type Severidad } from '../lib/api.notificaciones';
+import { fmtFecha } from '../lib/fechas';
 
 // ── Config visual por severidad ───────────────────────────────────────────────
 const SEV_CFG: Record<Severidad, {
@@ -14,9 +15,6 @@ const SEV_CFG: Record<Severidad, {
 
 const TIPO_ORDER = ['Contrato en riesgo', 'Hito vencido', 'Contrato por vencer', 'Proceso por cerrar'];
 
-function fmtFecha(iso: string) {
-  return new Date(iso).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' });
-}
 
 // ═══════════════════════════════════════════════════════════════════════════════
 export function NotificacionesPage() {

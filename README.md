@@ -607,6 +607,8 @@ Más casos en [docs/DESARROLLO.md §7](docs/DESARROLLO.md#7-solución-de-problem
 **Despliegue:** se moverá a un **servidor on-premise** (por definir). `render.yaml` y las referencias a
 Supabase son del esquema anterior y no se usan.
 
+**Tareas para el equipo:** el detalle de lo que falta, con historias de usuario y criterios de aceptación, está en [docs/BACKLOG.md](docs/BACKLOG.md) ([PDF](docs/BACKLOG.pdf)).
+
 **Pendientes conocidos:**
 - ⚠ **`POST /auth/register` es público:** cualquiera con acceso al API puede crear una cuenta COLABORADOR. Antes de exponer el servidor hay que restringirlo (por ejemplo, solo ADMIN, que ya puede crear usuarios con `/usuarios`).
 - Notificaciones push para iOS (Capacitor + OneSignal), previstas en el alcance pero aún sin implementar.

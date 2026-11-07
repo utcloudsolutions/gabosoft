@@ -13,7 +13,9 @@ import './styles/globals.css';
 
 export default function App() {
   const hydrate = useAuthStore((s) => s.hydrate);
-  useEffect(() => { hydrate(); }, [hydrate]);
+  useEffect(() => {
+    hydrate();
+  }, [hydrate]);
 
   return (
     <BrowserRouter>
@@ -23,10 +25,10 @@ export default function App() {
         <Route element={<ProtectedRoute />}>
           <Route element={<AppLayout />}>
             <Route index element={<Navigate to="/dashboard" replace />} />
-            <Route path="/dashboard"      element={<DashboardPage />} />
+            <Route path="/dashboard" element={<DashboardPage />} />
             <Route path="/precontractual" element={<PrecontractualPage />} />
-            <Route path="/contratos"      element={<ContratosPage />} />
-            <Route path="/catalogos"      element={<CatalogosPage />} />
+            <Route path="/contratos" element={<ContratosPage />} />
+            <Route path="/catalogos" element={<CatalogosPage />} />
             <Route path="/notificaciones" element={<NotificacionesPage />} />
           </Route>
         </Route>
@@ -36,4 +38,3 @@ export default function App() {
     </BrowserRouter>
   );
 }
-

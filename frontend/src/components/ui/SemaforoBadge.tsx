@@ -1,9 +1,9 @@
 type Semaforo = 'VERDE' | 'AMARILLO' | 'ROJO';
 
 const MAP: Record<Semaforo, { label: string; color: string; glass: string }> = {
-  VERDE:    { label: 'Al día',    color: 'var(--verde)',    glass: 'var(--verde-glass)' },
+  VERDE: { label: 'Al día', color: 'var(--verde)', glass: 'var(--verde-glass)' },
   AMARILLO: { label: 'En riesgo', color: 'var(--amarillo)', glass: 'var(--amarillo-glass)' },
-  ROJO:     { label: 'Vencido',   color: 'var(--rojo)',     glass: 'var(--rojo-glass)' },
+  ROJO: { label: 'Vencido', color: 'var(--rojo)', glass: 'var(--rojo-glass)' },
 };
 
 export function SemaforoBadge({ value }: { value: Semaforo }) {
@@ -17,7 +17,9 @@ export function SemaforoBadge({ value }: { value: Semaforo }) {
         color,
       }}
     >
-      <span style={{ width: 6, height: 6, borderRadius: '50%', background: color, flexShrink: 0 }} />
+      <span
+        style={{ width: 6, height: 6, borderRadius: '50%', background: color, flexShrink: 0 }}
+      />
       {label}
     </span>
   );

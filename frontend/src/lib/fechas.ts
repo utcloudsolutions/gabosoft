@@ -13,7 +13,11 @@ export function parseFecha(s: string): Date {
 
 /** "30 jun 2027" */
 export function fmtFecha(s: string): string {
-  return parseFecha(s).toLocaleDateString('es-CO', { day: '2-digit', month: 'short', year: 'numeric' });
+  return parseFecha(s).toLocaleDateString('es-CO', {
+    day: '2-digit',
+    month: 'short',
+    year: 'numeric',
+  });
 }
 
 /** Días de calendario desde hoy hasta la fecha (0 = hoy, negativo = ya pasó). */

@@ -1,6 +1,7 @@
 import { api } from './api';
 
-export type EstadoProceso = 'ESTRUCTURACION' | 'PRESENTACION' | 'GANADO' | 'NO_ADJUDICADO' | 'DESIERTO';
+export type EstadoProceso =
+  'ESTRUCTURACION' | 'PRESENTACION' | 'GANADO' | 'NO_ADJUDICADO' | 'DESIERTO';
 
 export interface Proceso {
   id: string;
@@ -60,8 +61,7 @@ export const procesosApi = {
   list: (params?: Record<string, string | number>) =>
     api.get<ProcesoListResponse>('/procesos', { params }).then((r) => r.data),
 
-  get: (id: string) =>
-    api.get<Proceso>(`/procesos/${id}`).then((r) => r.data),
+  get: (id: string) => api.get<Proceso>(`/procesos/${id}`).then((r) => r.data),
 
   create: (payload: CreateProcesoPayload) =>
     api.post<Proceso>('/procesos', payload).then((r) => r.data),
@@ -72,6 +72,5 @@ export const procesosApi = {
   cambiarEstado: (id: string, payload: CambiarEstadoPayload) =>
     api.patch<Proceso>(`/procesos/${id}/estado`, payload).then((r) => r.data),
 
-  delete: (id: string) =>
-    api.delete(`/procesos/${id}`),
+  delete: (id: string) => api.delete(`/procesos/${id}`),
 };

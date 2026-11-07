@@ -55,13 +55,9 @@ export async function getKpis() {
     _sum: { valorEstimado: true },
   });
 
-  const estadoMap = Object.fromEntries(
-    procesosPorEstado.map((r) => [r.estado, r._count.id]),
-  );
+  const estadoMap = Object.fromEntries(procesosPorEstado.map((r) => [r.estado, r._count.id]));
 
-  const semaforoMap = Object.fromEntries(
-    semaforos.map((r) => [r.semaforo, r._count.id]),
-  );
+  const semaforoMap = Object.fromEntries(semaforos.map((r) => [r.semaforo, r._count.id]));
 
   const valorTotal = Number(contratosValores._sum.valorTotal ?? 0);
   const valorEjecutado = Number(contratosValores._sum.valorEjecutado ?? 0);

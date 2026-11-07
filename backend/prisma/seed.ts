@@ -8,9 +8,24 @@ const prisma = new PrismaClient({
 });
 
 const DEV_USERS = [
-  { nombre: 'Admin Dev',       email: 'admin@techtransit.dev',       password: 'Admin1234!',  rol: 'ADMIN'       as const },
-  { nombre: 'Supervisor Dev',  email: 'supervisor@techtransit.dev',  password: 'Super1234!',  rol: 'SUPERVISOR'  as const },
-  { nombre: 'Colaborador Dev', email: 'colaborador@techtransit.dev', password: 'Colab1234!',  rol: 'COLABORADOR' as const },
+  {
+    nombre: 'Admin Dev',
+    email: 'admin@techtransit.dev',
+    password: 'Admin1234!',
+    rol: 'ADMIN' as const,
+  },
+  {
+    nombre: 'Supervisor Dev',
+    email: 'supervisor@techtransit.dev',
+    password: 'Super1234!',
+    rol: 'SUPERVISOR' as const,
+  },
+  {
+    nombre: 'Colaborador Dev',
+    email: 'colaborador@techtransit.dev',
+    password: 'Colab1234!',
+    rol: 'COLABORADOR' as const,
+  },
 ];
 
 async function main() {
@@ -20,7 +35,7 @@ async function main() {
     const passwordHash = await bcrypt.hash(u.password, 12);
 
     await prisma.usuario.upsert({
-      where:  { email: u.email },
+      where: { email: u.email },
       update: { nombre: u.nombre, passwordHash, rol: u.rol, activo: true },
       create: { nombre: u.nombre, email: u.email, passwordHash, rol: u.rol },
     });
@@ -32,5 +47,8 @@ async function main() {
 }
 
 main()
-  .catch((e) => { console.error(e); process.exit(1); })
+  .catch((e) => {
+    console.error(e);
+    process.exit(1);
+  })
   .finally(() => prisma.$disconnect());

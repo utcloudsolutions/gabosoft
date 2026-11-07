@@ -2,7 +2,7 @@ import { z } from 'zod';
 
 // ── Schema reutilizable ───────────────────────────────────────────────────────
 export const paginationSchema = z.object({
-  page:  z.coerce.number().int().min(1).default(1),
+  page: z.coerce.number().int().min(1).default(1),
   limit: z.coerce.number().int().min(1).max(200).default(50),
 });
 
@@ -12,7 +12,7 @@ export type PaginationParams = z.infer<typeof paginationSchema>;
 export interface PaginatedResponse<T> {
   items: T[];
   total: number;
-  page:  number;
+  page: number;
   limit: number;
   pages: number;
 }

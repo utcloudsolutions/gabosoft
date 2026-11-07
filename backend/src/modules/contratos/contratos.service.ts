@@ -14,10 +14,10 @@ import type {
 
 // ── Include reutilizable ──────────────────────────────────────────────────────
 const CONTRATO_INCLUDE = {
-  entidad:    { select: { id: true, nombre: true, nit: true, municipio: true } },
-  responsable:{ select: { id: true, nombre: true, email: true } },
-  proceso:    { select: { id: true, nombre: true, numeroProceso: true } },
-  hitos:      { orderBy: { fechaLimite: 'asc' as const } },
+  entidad: { select: { id: true, nombre: true, nit: true, municipio: true } },
+  responsable: { select: { id: true, nombre: true, email: true } },
+  proceso: { select: { id: true, nombre: true, numeroProceso: true } },
+  hitos: { orderBy: { fechaLimite: 'asc' as const } },
 } as const;
 
 // ── Semáforo automático ───────────────────────────────────────────────────────
@@ -29,22 +29,22 @@ export function calcularSemaforo(
   // Si ya terminó en tiempo → VERDE
   if (fechaFinReal && fechaFinReal <= fechaFin) return 'VERDE';
 
-  const hoy       = hoyFecha();
-  const fin       = fechaFin;
+  const hoy = hoyFecha();
+  const fin = fechaFin;
   const diasTotal = diasEntre(hoy, fin);
 
   // Vencido
   if (hoy > fin && !fechaFinReal) return 'ROJO';
 
   // Avance físico vs tiempo transcurrido
-  const inicioEjercicio   = new Date(Date.UTC(fin.getUTCFullYear(), 0, 1));
-  const tiempoTotalDias   = diasEntre(inicioEjercicio, fin);
+  const inicioEjercicio = new Date(Date.UTC(fin.getUTCFullYear(), 0, 1));
+  const tiempoTotalDias = diasEntre(inicioEjercicio, fin);
   const tiempoElapsedDias = diasEntre(inicioEjercicio, hoy);
-  const avanceEsperado    = tiempoTotalDias > 0 ? (tiempoElapsedDias / tiempoTotalDias) * 100 : 0;
-  const brecha            = avanceEsperado - avanceFisico;
+  const avanceEsperado = tiempoTotalDias > 0 ? (tiempoElapsedDias / tiempoTotalDias) * 100 : 0;
+  const brecha = avanceEsperado - avanceFisico;
 
   if (diasTotal <= 15 || brecha > 20) return 'ROJO';
-  if (brecha > 10)                    return 'AMARILLO';
+  if (brecha > 10) return 'AMARILLO';
   return 'VERDE';
 }
 
@@ -54,8 +54,8 @@ export async function listContratos(filters: z.infer<typeof listContratosSchema>
   const skip = (page - 1) * limit;
 
   const where = {
-    ...(semaforo      && { semaforo }),
-    ...(entidadId     && { entidadId }),
+    ...(semaforo && { semaforo }),
+    ...(entidadId && { entidadId }),
     ...(responsableId && { responsableId }),
     activo: activo === 'true',
   };
@@ -109,12 +109,14 @@ export async function updateContrato(id: string, data: z.infer<typeof updateCont
   if (!exists) throw createError('Contrato no encontrado', 404);
 
   if (data.numeroContrato && data.numeroContrato !== exists.numeroContrato) {
-    const dup = await prisma.contrato.findUnique({ where: { numeroContrato: data.numeroContrato } });
+    const dup = await prisma.contrato.findUnique({
+      where: { numeroContrato: data.numeroContrato },
+    });
     if (dup) throw createError('Ya existe un contrato con ese número', 409);
   }
 
   const avanceFisico = data.avanceFisico ?? Number(exists.avanceFisico);
-  const fechaFin     = data.fechaFin ? new Date(data.fechaFin) : exists.fechaFin;
+  const fechaFin = data.fechaFin ? new Date(data.fechaFin) : exists.fechaFin;
   const fechaFinReal = data.fechaFinReal ? new Date(data.fechaFinReal) : exists.fechaFinReal;
 
   // Recalcular semáforo si cambia avance o fechas
@@ -124,8 +126,8 @@ export async function updateContrato(id: string, data: z.infer<typeof updateCont
     where: { id },
     data: {
       ...data,
-      ...(data.fechaInicio  && { fechaInicio:  new Date(data.fechaInicio) }),
-      ...(data.fechaFin     && { fechaFin }),
+      ...(data.fechaInicio && { fechaInicio: new Date(data.fechaInicio) }),
+      ...(data.fechaFin && { fechaFin }),
       ...(data.fechaFinReal && { fechaFinReal }),
       semaforo: semaforoAuto,
     },
@@ -139,7 +141,7 @@ export async function updateSemaforo(id: string, data: z.infer<typeof updateSema
   if (!exists) throw createError('Contrato no encontrado', 404);
   return prisma.contrato.update({
     where: { id },
-    data:  { semaforo: data.semaforo as SemaforoContrato },
+    data: { semaforo: data.semaforo as SemaforoContrato },
     include: CONTRATO_INCLUDE,
   });
 }
@@ -148,7 +150,11 @@ export async function updateSemaforo(id: string, data: z.infer<typeof updateSema
 export async function deleteContrato(id: string) {
   const exists = await prisma.contrato.findUnique({ where: { id } });
   if (!exists) throw createError('Contrato no encontrado', 404);
-  return prisma.contrato.update({ where: { id }, data: { activo: false }, include: CONTRATO_INCLUDE });
+  return prisma.contrato.update({
+    where: { id },
+    data: { activo: false },
+    include: CONTRATO_INCLUDE,
+  });
 }
 
 // ── Hitos ─────────────────────────────────────────────────────────────────────
@@ -177,7 +183,7 @@ export async function updateHito(
     where: { id: hitoId },
     data: {
       ...data,
-      ...(data.fechaLimite      && { fechaLimite:      new Date(data.fechaLimite) }),
+      ...(data.fechaLimite && { fechaLimite: new Date(data.fechaLimite) }),
       ...(data.fechaCumplimiento && { fechaCumplimiento: new Date(data.fechaCumplimiento) }),
     },
   });

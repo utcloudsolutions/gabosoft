@@ -4,26 +4,25 @@ import { diasHasta, hoyFecha, sumarDias } from '../../lib/fechas';
 export type Severidad = 'danger' | 'warning' | 'info';
 
 export interface Notificacion {
-  id:          string;
-  tipo:        string;
-  severidad:   Severidad;
-  titulo:      string;
+  id: string;
+  tipo: string;
+  severidad: Severidad;
+  titulo: string;
   descripcion: string;
-  entidad:     string;
-  enlace:      string;
-  fecha:       string;
+  entidad: string;
+  enlace: string;
+  fecha: string;
 }
 
-
 export async function getNotificaciones(): Promise<Notificacion[]> {
-  const hoy       = hoyFecha();
-  const en30dias  = sumarDias(hoy, 30);
-  const en15dias  = sumarDias(hoy, 15);
+  const hoy = hoyFecha();
+  const en30dias = sumarDias(hoy, 30);
+  const en15dias = sumarDias(hoy, 15);
 
   const [contratosRojo, contratosVencen, hitosVencidos, procesosVencen] = await Promise.all([
     // Contratos con semáforo ROJO activos
     prisma.contrato.findMany({
-      where:   { activo: true, semaforo: 'ROJO' },
+      where: { activo: true, semaforo: 'ROJO' },
       include: { entidad: { select: { nombre: true } } },
       orderBy: { fechaFin: 'asc' },
     }),
@@ -42,7 +41,7 @@ export async function getNotificaciones(): Promise<Notificacion[]> {
     // Hitos vencidos no completados
     prisma.hitoContrato.findMany({
       where: {
-        estado:      { in: ['PENDIENTE', 'EN_PROGRESO'] },
+        estado: { in: ['PENDIENTE', 'EN_PROGRESO'] },
         fechaLimite: { lt: hoy },
       },
       include: {
@@ -54,7 +53,7 @@ export async function getNotificaciones(): Promise<Notificacion[]> {
     // Procesos activos con fechaCierre en los próximos 15 días
     prisma.procesoPrecontractual.findMany({
       where: {
-        estado:      { in: ['ESTRUCTURACION', 'PRESENTACION'] },
+        estado: { in: ['ESTRUCTURACION', 'PRESENTACION'] },
         fechaCierre: { gte: hoy, lte: en15dias },
       },
       include: { entidad: { select: { nombre: true } } },
@@ -68,16 +67,17 @@ export async function getNotificaciones(): Promise<Notificacion[]> {
   for (const c of contratosRojo) {
     const dias = diasHasta(c.fechaFin);
     resultado.push({
-      id:          `contrato-rojo-${c.id}`,
-      tipo:        'Contrato en riesgo',
-      severidad:   'danger',
-      titulo:      `Contrato ${c.numeroContrato} — semáforo ROJO`,
-      descripcion: dias < 0
-        ? `Venció hace ${Math.abs(dias)} días. ${c.objeto}`
-        : `Vence en ${dias} días. ${c.objeto}`,
-      entidad:     c.entidad.nombre,
-      enlace:      '/contratos',
-      fecha:       c.fechaFin.toISOString(),
+      id: `contrato-rojo-${c.id}`,
+      tipo: 'Contrato en riesgo',
+      severidad: 'danger',
+      titulo: `Contrato ${c.numeroContrato} — semáforo ROJO`,
+      descripcion:
+        dias < 0
+          ? `Venció hace ${Math.abs(dias)} días. ${c.objeto}`
+          : `Vence en ${dias} días. ${c.objeto}`,
+      entidad: c.entidad.nombre,
+      enlace: '/contratos',
+      fecha: c.fechaFin.toISOString(),
     });
   }
 
@@ -85,14 +85,14 @@ export async function getNotificaciones(): Promise<Notificacion[]> {
   for (const c of contratosVencen) {
     const dias = diasHasta(c.fechaFin);
     resultado.push({
-      id:          `contrato-vence-${c.id}`,
-      tipo:        'Contrato por vencer',
-      severidad:   dias <= 7 ? 'danger' : 'warning',
-      titulo:      `Contrato ${c.numeroContrato} vence en ${dias} días`,
+      id: `contrato-vence-${c.id}`,
+      tipo: 'Contrato por vencer',
+      severidad: dias <= 7 ? 'danger' : 'warning',
+      titulo: `Contrato ${c.numeroContrato} vence en ${dias} días`,
       descripcion: c.objeto,
-      entidad:     c.entidad.nombre,
-      enlace:      '/contratos',
-      fecha:       c.fechaFin.toISOString(),
+      entidad: c.entidad.nombre,
+      enlace: '/contratos',
+      fecha: c.fechaFin.toISOString(),
     });
   }
 
@@ -100,14 +100,14 @@ export async function getNotificaciones(): Promise<Notificacion[]> {
   for (const h of hitosVencidos) {
     const dias = diasHasta(h.fechaLimite);
     resultado.push({
-      id:          `hito-vencido-${h.id}`,
-      tipo:        'Hito vencido',
-      severidad:   'danger',
-      titulo:      `Hito vencido: ${h.nombre}`,
+      id: `hito-vencido-${h.id}`,
+      tipo: 'Hito vencido',
+      severidad: 'danger',
+      titulo: `Hito vencido: ${h.nombre}`,
       descripcion: `Contrato ${h.contrato.numeroContrato} · Venció hace ${Math.abs(dias)} días`,
-      entidad:     h.contrato.objeto,
-      enlace:      '/contratos',
-      fecha:       h.fechaLimite.toISOString(),
+      entidad: h.contrato.objeto,
+      enlace: '/contratos',
+      fecha: h.fechaLimite.toISOString(),
     });
   }
 
@@ -115,14 +115,14 @@ export async function getNotificaciones(): Promise<Notificacion[]> {
   for (const p of procesosVencen) {
     const dias = diasHasta(p.fechaCierre!);
     resultado.push({
-      id:          `proceso-cierre-${p.id}`,
-      tipo:        'Proceso por cerrar',
-      severidad:   dias <= 5 ? 'danger' : 'warning',
-      titulo:      `Cierre de licitación en ${dias} días`,
+      id: `proceso-cierre-${p.id}`,
+      tipo: 'Proceso por cerrar',
+      severidad: dias <= 5 ? 'danger' : 'warning',
+      titulo: `Cierre de licitación en ${dias} días`,
       descripcion: p.nombre,
-      entidad:     p.entidad.nombre,
-      enlace:      '/precontractual',
-      fecha:       p.fechaCierre!.toISOString(),
+      entidad: p.entidad.nombre,
+      enlace: '/precontractual',
+      fecha: p.fechaCierre!.toISOString(),
     });
   }
 

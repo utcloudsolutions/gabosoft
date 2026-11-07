@@ -2,10 +2,10 @@ type EstadoProceso = 'ESTRUCTURACION' | 'PRESENTACION' | 'GANADO' | 'NO_ADJUDICA
 
 const MAP: Record<EstadoProceso, { label: string; color: string }> = {
   ESTRUCTURACION: { label: 'Estructuración', color: 'var(--estado-estructuracion)' },
-  PRESENTACION:   { label: 'Presentación',   color: 'var(--estado-presentacion)' },
-  GANADO:         { label: 'Ganado',          color: 'var(--estado-ganado)' },
-  NO_ADJUDICADO:  { label: 'No adjudicado',   color: 'var(--estado-no-adjudicado)' },
-  DESIERTO:       { label: 'Desierto',        color: 'var(--estado-desierto)' },
+  PRESENTACION: { label: 'Presentación', color: 'var(--estado-presentacion)' },
+  GANADO: { label: 'Ganado', color: 'var(--estado-ganado)' },
+  NO_ADJUDICADO: { label: 'No adjudicado', color: 'var(--estado-no-adjudicado)' },
+  DESIERTO: { label: 'Desierto', color: 'var(--estado-desierto)' },
 };
 
 export function EstadoBadge({ value }: { value: EstadoProceso }) {

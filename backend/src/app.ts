@@ -26,34 +26,36 @@ app.use(cors({ origin: env.FRONTEND_URL, credentials: true }));
 app.use(compression());
 
 // ── Logging estructurado (reemplaza morgan) ───────────────────────────────────
-app.use(pinoHttp({
-  logger,
-  // No loguear el health check para no llenar los logs
-  autoLogging: { ignore: (req) => req.url === '/api/v1/health' },
-  customLogLevel: (_req, res) => {
-    if (res.statusCode >= 500) return 'error';
-    if (res.statusCode >= 400) return 'warn';
-    return 'info';
-  },
-}));
+app.use(
+  pinoHttp({
+    logger,
+    // No loguear el health check para no llenar los logs
+    autoLogging: { ignore: (req) => req.url === '/api/v1/health' },
+    customLogLevel: (_req, res) => {
+      if (res.statusCode >= 500) return 'error';
+      if (res.statusCode >= 400) return 'warn';
+      return 'info';
+    },
+  }),
+);
 
 // ── Rate limiting ─────────────────────────────────────────────────────────────
 // Global: 200 req / 15 min por IP
 const globalLimiter = rateLimit({
-  windowMs:         15 * 60 * 1000,
-  max:              200,
-  standardHeaders:  true,
-  legacyHeaders:    false,
-  message:          { message: 'Demasiadas solicitudes, intenta más tarde.' },
+  windowMs: 15 * 60 * 1000,
+  max: 200,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Demasiadas solicitudes, intenta más tarde.' },
 });
 
 // Estricto para auth: 20 req / 15 min por IP
 const authLimiter = rateLimit({
-  windowMs:         15 * 60 * 1000,
-  max:              20,
-  standardHeaders:  true,
-  legacyHeaders:    false,
-  message:          { message: 'Demasiados intentos de autenticación, intenta más tarde.' },
+  windowMs: 15 * 60 * 1000,
+  max: 20,
+  standardHeaders: true,
+  legacyHeaders: false,
+  message: { message: 'Demasiados intentos de autenticación, intenta más tarde.' },
 });
 
 app.use(globalLimiter);
@@ -68,14 +70,14 @@ app.get('/api/v1/health', (_req, res) => {
 });
 
 // ── Routers ────────────────────────────────────────────────────────────────────
-app.use('/api/v1/auth',       authLimiter, authRouter);
-app.use('/api/v1/dashboard',  dashboardRouter);
-app.use('/api/v1/procesos',   procesosRouter);
-app.use('/api/v1/entidades',  entidadesRouter);
-app.use('/api/v1/aliados',    aliadosRouter);
-app.use('/api/v1/usuarios',   usuariosRouter);
-app.use('/api/v1/contratos',       contratosRouter);
-app.use('/api/v1/notificaciones',  notificacionesRouter);
+app.use('/api/v1/auth', authLimiter, authRouter);
+app.use('/api/v1/dashboard', dashboardRouter);
+app.use('/api/v1/procesos', procesosRouter);
+app.use('/api/v1/entidades', entidadesRouter);
+app.use('/api/v1/aliados', aliadosRouter);
+app.use('/api/v1/usuarios', usuariosRouter);
+app.use('/api/v1/contratos', contratosRouter);
+app.use('/api/v1/notificaciones', notificacionesRouter);
 
 // ── Global error handler (debe ir al final) ────────────────────────────────────
 app.use(errorHandler);

@@ -83,10 +83,7 @@ export async function getProceso(id: string) {
 }
 
 // ── Create ────────────────────────────────────────────────────────────────────
-export async function createProceso(
-  data: z.infer<typeof createProcesoSchema>,
-  usuarioId: string,
-) {
+export async function createProceso(data: z.infer<typeof createProcesoSchema>, usuarioId: string) {
   const { aliadoIds = [], ...rest } = data;
 
   return prisma.$transaction(async (tx) => {

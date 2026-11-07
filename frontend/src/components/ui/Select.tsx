@@ -15,9 +15,16 @@ interface SelectProps {
   style?: React.CSSProperties;
 }
 
-export function Select({ value, onChange, options, placeholder = 'Seleccionar...', disabled, style }: SelectProps) {
+export function Select({
+  value,
+  onChange,
+  options,
+  placeholder = 'Seleccionar...',
+  disabled,
+  style,
+}: SelectProps) {
   const [open, setOpen] = useState(false);
-  const ref  = useRef<HTMLDivElement>(null);
+  const ref = useRef<HTMLDivElement>(null);
 
   const selected = options.find((o) => o.value === value);
 
@@ -34,14 +41,15 @@ export function Select({ value, onChange, options, placeholder = 'Seleccionar...
   // Cerrar con Escape
   useEffect(() => {
     if (!open) return;
-    const handler = (e: KeyboardEvent) => { if (e.key === 'Escape') setOpen(false); };
+    const handler = (e: KeyboardEvent) => {
+      if (e.key === 'Escape') setOpen(false);
+    };
     document.addEventListener('keydown', handler);
     return () => document.removeEventListener('keydown', handler);
   }, [open]);
 
   return (
     <div ref={ref} style={{ position: 'relative', ...style }}>
-
       {/* Trigger */}
       <button
         type="button"
@@ -66,7 +74,9 @@ export function Select({ value, onChange, options, placeholder = 'Seleccionar...
           opacity: disabled ? 0.5 : 1,
         }}
       >
-        <span style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}>
+        <span
+          style={{ overflow: 'hidden', textOverflow: 'ellipsis', whiteSpace: 'nowrap', flex: 1 }}
+        >
           {selected ? selected.label : placeholder}
         </span>
         <ChevronDown
@@ -105,11 +115,16 @@ export function Select({ value, onChange, options, placeholder = 'Seleccionar...
             <button
               type="button"
               className="select-option"
-              onClick={() => { onChange(''); setOpen(false); }}
+              onClick={() => {
+                onChange('');
+                setOpen(false);
+              }}
               style={optionStyle(value === '')}
             >
               <span style={{ color: 'var(--text-muted)', flex: 1 }}>{placeholder}</span>
-              {value === '' && <Check size={13} style={{ color: 'var(--primary-light)', flexShrink: 0 }} />}
+              {value === '' && (
+                <Check size={13} style={{ color: 'var(--primary-light)', flexShrink: 0 }} />
+              )}
             </button>
           )}
 
@@ -120,19 +135,35 @@ export function Select({ value, onChange, options, placeholder = 'Seleccionar...
                 key={opt.value}
                 type="button"
                 className="select-option"
-                onClick={() => { onChange(opt.value); setOpen(false); }}
+                onClick={() => {
+                  onChange(opt.value);
+                  setOpen(false);
+                }}
                 style={optionStyle(isSelected)}
               >
-                <span style={{ flex: 1, color: isSelected ? 'var(--text-primary)' : 'var(--text-secondary)' }}>
+                <span
+                  style={{
+                    flex: 1,
+                    color: isSelected ? 'var(--text-primary)' : 'var(--text-secondary)',
+                  }}
+                >
                   {opt.label}
                 </span>
-                {isSelected && <Check size={13} style={{ color: 'var(--primary-light)', flexShrink: 0 }} />}
+                {isSelected && (
+                  <Check size={13} style={{ color: 'var(--primary-light)', flexShrink: 0 }} />
+                )}
               </button>
             );
           })}
 
           {options.length === 0 && (
-            <div style={{ padding: 'var(--space-3) var(--space-4)', color: 'var(--text-muted)', fontSize: 13 }}>
+            <div
+              style={{
+                padding: 'var(--space-3) var(--space-4)',
+                color: 'var(--text-muted)',
+                fontSize: 13,
+              }}
+            >
               Sin opciones
             </div>
           )}

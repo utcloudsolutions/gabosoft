@@ -52,6 +52,7 @@ Además de sus criterios propios, una tarea solo está terminada si:
 | T-01 | Formatear el código con Prettier | 0 · Higiene | 🟢 | S | — |
 | T-02 | Eliminar restos de Render y Supabase | 0 · Higiene | 🟢 | S | — |
 | T-03 | Inventario de licencias (`LICENSES.md`) | 0 · Higiene | 🟢 | S | — |
+| T-18 | Corregir el inventario de licencias | 0 · Higiene | 🟢 | S | T-03 |
 | T-04 | Cerrar el registro público de usuarios | 1 · Seguridad | 🟢 | S | — |
 | T-05 | Textos del semáforo según días restantes | 2 · Funcionalidad | 🟢 | S | 🟠 decisión |
 | T-06 | Días restantes en las tarjetas del Kanban | 2 · Funcionalidad | 🟢 | S | — |
@@ -137,17 +138,79 @@ Tareas cortas, ideales para el primer día: obligan a recorrer el proyecto sin r
 - El alcance (§9, decisión 6) exige solo licencias permisivas (MIT, Apache-2.0, BSD, ISC o similares)
   y prohíbe GPL/LGPL/AGPL. También pide documentarlo en `LICENSES.md`.
 
+> ⚠ **Corrección (9-nov-2026):** la primera versión de esta guía indicaba
+> `npx license-checker-rseidelsohn --production --summary`. En este monorepo ese comando **solo
+> encuentra el propio proyecto** ("techtransit UNLICENSED"), porque npm instala las dependencias de los
+> workspaces en el `node_modules` de la raíz. El trabajo para dejar el inventario correcto está en **T-18**.
+
 **Guía técnica**
-1. Genera el resumen: `npx license-checker-rseidelsohn --production --summary`
-   y el detalle con `--csv` o `--markdown`.
-2. Crea `LICENSES.md` en la raíz con: fecha de generación, resumen por tipo de licencia y la tabla
-   de dependencias de producción (nombre, versión, licencia).
-3. Añade al README, en "Scripts disponibles", el comando para regenerarlo.
+1. Genera el resumen: `npx license-checker-rseidelsohn --excludePrivatePackages --summary`.
+2. Genera el detalle: `npx license-checker-rseidelsohn --excludePrivatePackages --markdown --out licencias-detalle.md`.
+3. Crea `LICENSES.md` en la raíz con: fecha de generación, comando usado, resumen por tipo de licencia,
+   las licencias que requieren revisión y la tabla de dependencias.
+4. Añade al README, en "Scripts disponibles", el comando para regenerarlo.
 
 **Criterios de aceptación**
-- [ ] Existe `LICENSES.md` con resumen y tabla de dependencias de producción.
+- [ ] Existe `LICENSES.md` con resumen y tabla de dependencias.
 - [ ] Si alguna dependencia es GPL, LGPL, AGPL o "UNKNOWN", está **resaltada** y se avisó al líder en el PR.
 - [ ] El documento explica cómo regenerarlo.
+
+---
+
+### T-18 · Corregir el inventario de licencias
+
+🟢 Junior · **S** · Depende de T-03
+
+**Historia de usuario**
+> Como **responsable del producto**, quiero que `LICENSES.md` muestre las licencias reales de todas las
+> librerías del proyecto, para poder confirmar que ninguna nos obliga a publicar el código.
+
+**Contexto**
+- T-03 se hizo siguiendo la guía original, pero el comando de esa guía estaba **mal** para este
+  monorepo: `--production` solo encuentra el propio proyecto y por eso `LICENSES.md` quedó con una sola
+  línea ("techtransit 0.1.0 UNLICENSED"). No fue un error de quien hizo T-03.
+- npm instala las dependencias de `backend/` y `frontend/` en el `node_modules` de la **raíz**, así que
+  tampoco sirve `--start backend`.
+- El análisis con el comando correcto ya se hizo una vez (9-nov-2026) y dio:
+  - **Ninguna licencia GPL, LGPL ni AGPL.**
+  - Resumen: MIT 472 · Apache-2.0 38 · ISC 38 · BSD-2-Clause 8 · BSD-3-Clause 7 · MPL-2.0 6 · Unlicense 2 ·
+    MIT and ISC 1 · Python-2.0 1 · CC-BY-4.0 1 · EPL-2.0 1 · BlueOak-1.0.0 1.
+  - Para documentar (no bloquean): **MPL-2.0** (`lightningcss`, lo usa Tailwind solo al compilar los
+    estilos) y **EPL-2.0** (`elkjs`) / **Unlicense** (`postgres`, `robust-predicates`), que vienen del
+    CLI de Prisma, una herramienta de desarrollo.
+
+**Guía técnica**
+1. Trabaja sobre la versión de `LICENSES.md` que dejó T-03 (si T-03 aún no está en `main`, parte de esa rama).
+2. Genera el resumen (excluye los paquetes propios del proyecto):
+   ```bash
+   npx license-checker-rseidelsohn --excludePrivatePackages --summary
+   ```
+3. Genera la lista completa:
+   ```bash
+   npx license-checker-rseidelsohn --excludePrivatePackages --markdown --out licencias-detalle.md
+   ```
+4. Verifica que no haya licencias prohibidas (si encuentra alguna, el comando termina con error):
+   ```bash
+   npx license-checker-rseidelsohn --excludePrivatePackages --failOn "GPL;LGPL;AGPL;GPL-2.0;GPL-3.0;LGPL-2.1;LGPL-3.0;AGPL-3.0"
+   ```
+5. Reescribe `LICENSES.md` con estas secciones:
+   - **Fecha y comando** con que se generó.
+   - **Resumen** por tipo de licencia (salida del paso 2).
+   - **Licencias que requieren atención:** una tabla con paquete, licencia, de dónde viene y por qué no
+     es un problema (usa la información del Contexto).
+   - **Detalle completo:** pega aquí la salida del paso 3, o déjala en `docs/licencias-detalle.md` y enlázala.
+   - **Cómo regenerarlo:** los comandos de los pasos 2 a 4.
+6. En el README ("Scripts disponibles") reemplaza los comandos de licencias por los de esta tarea y
+   revisa que la tabla se vea bien en GitHub: cada comando debe ir completo entre comillas invertidas
+   (`` `...` ``). Si un comando tiene `|` o `;`, escápalo o sácalo de la tabla a un bloque de código.
+
+**Criterios de aceptación**
+- [ ] El resumen de `LICENSES.md` muestra los tipos de licencia (MIT, Apache-2.0, ISC...), no solo "UNLICENSED: 1".
+- [ ] La lista completa tiene más de 500 paquetes, con nombre, versión y licencia.
+- [ ] El comando de verificación del paso 4 termina sin error (código de salida 0).
+- [ ] Las licencias MPL-2.0, EPL-2.0 y Unlicense aparecen en "requieren atención" con su explicación.
+- [ ] La tabla de scripts del README se ve correctamente en GitHub (sin filas desordenadas).
+- [ ] Cualquier persona puede regenerar el archivo siguiendo solo lo que dice `LICENSES.md`.
 
 ---
 

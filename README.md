@@ -364,7 +364,7 @@ Base: `/api/v1`. Todas las rutas, salvo `health` y `auth` (excepto `logout`), ex
 | Método | Ruta | Rol mínimo | Descripción |
 |---|---|---|---|
 | GET | `/health` | público | Estado del servidor. |
-| POST | `/auth/register` | público | Crea usuario (rol COLABORADOR) y devuelve tokens. ⚠ Ver §14. |
+## | POST | `/auth/register` | público | Crea usuario (rol COLABORADOR) y devuelve tokens. ⚠ Ver §14. |
 | POST | `/auth/login` | público | `{email, password}` → tokens. |
 | POST | `/auth/refresh` | público | `{refreshToken}` → tokens nuevos. |
 | POST | `/auth/logout` | autenticado | Invalida el refresh token. |
@@ -608,13 +608,13 @@ Más casos en [docs/DESARROLLO.md §7](docs/DESARROLLO.md#7-solución-de-problem
 
 ## 14. Estado del proyecto y pendientes
 
-**Despliegue:** se moverá a un **servidor on-premise** (por definir). `render.yaml` y las referencias a
+## **Despliegue:** se moverá a un **servidor on-premise** (por definir). `render.yaml` y las referencias a
 Supabase son del esquema anterior y no se usan.
 
 **Tareas para el equipo:** el detalle de lo que falta, con historias de usuario y criterios de aceptación, está en [docs/BACKLOG.md](docs/BACKLOG.md) ([PDF](docs/BACKLOG.pdf)).
 
-**Pendientes conocidos:**
-- ⚠ **`POST /auth/register` es público:** cualquiera con acceso al API puede crear una cuenta COLABORADOR. Antes de exponer el servidor hay que restringirlo (por ejemplo, solo ADMIN, que ya puede crear usuarios con `/usuarios`).
+ //**Pendientes conocidos:**
+## //- ⚠ **`POST /auth/register` es público:** cualquiera con acceso al API puede crear una cuenta COLABORADOR. Antes //de exponer el servidor hay que restringirlo (por ejemplo, solo ADMIN, que ya puede crear usuarios con `/usuarios`).
 - Notificaciones push para iOS (Capacitor + OneSignal), previstas en el alcance pero aún sin implementar.
 - La regla de lint `react-hooks/set-state-in-effect` está desactivada hasta migrar la carga de datos de las páginas (p. ej. a TanStack Query).
 - Prettier marca archivos sin formatear; correr `npm run format` en un commit aparte.

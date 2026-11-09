@@ -88,7 +88,7 @@ npm run db:up
 cp backend/.env.development.example backend/.env
 
 # 4. Crear las tablas, generar el cliente de Prisma y cargar usuarios de prueba
-npm run db:setup -w backend
+  npm run db:setup -w backend
 
 # 5. Arrancar (en dos terminales distintas)
 npm run start:dev -w backend     # API      → http://localhost:4000/api/v1/health
@@ -541,6 +541,10 @@ Se ejecutan desde la **raíz** del repositorio.
 | `npm run lint` | Revisa el código de backend y frontend. |
 | `npm run build` | Compila backend (`backend/dist`) y frontend (`frontend/dist`). |
 | `npm run format` | Formatea el código con Prettier. |
+| `npx license-checker-rseidelsohn --production --summary | Escanea todas las licencias |
+| `npx license-checker-rseidelsohn --production --summary --csv | Organiza la informaciòn en formato excel |
+| `npx license-checker-rseidelsohn --production --summary --markdown| Organiza en formato legible doc. tècnica |
+
 
 ---
 

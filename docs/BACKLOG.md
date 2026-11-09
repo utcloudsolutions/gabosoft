@@ -49,7 +49,7 @@ Además de sus criterios propios, una tarea solo está terminada si:
 
 | ID | Tarea | Bloque | Nivel | Tamaño | Depende de |
 |---|---|---|---|---|---|
-| T-01 | Formatear el código con Prettier | 0 · Higiene | 🟢 | S | — |
+| T-01 | Formatear el código con Prettier | 0 · Higiene | 🟢 | L | — |
 | T-02 | Eliminar restos de Render y Supabase | 0 · Higiene | 🟢 | S | — |
 | T-03 | Inventario de licencias (`LICENSES.md`) | 0 · Higiene | 🟢 | S | — |
 | T-04 | Cerrar el registro público de usuarios | 1 · Seguridad | 🟢 | S | — |
@@ -97,7 +97,7 @@ Tareas cortas, ideales para el primer día: obligan a recorrer el proyecto sin r
 
 ---
 
-### T-02 · Eliminar restos de Render y Supabase
+### T-02 · Eliminar restos de Render y 
 
 🟢 Junior · **S** · Sin dependencias
 

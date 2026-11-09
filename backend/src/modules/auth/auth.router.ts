@@ -1,20 +1,9 @@
 import { Router, Request, Response, NextFunction } from 'express';
 import { requireAuth } from '../../middleware/auth';
 import * as authService from './auth.service';
-import { loginSchema, refreshSchema, registerSchema } from './auth.schemas';
+import { loginSchema, refreshSchema } from './auth.schemas';
 
 const router = Router();
-
-// POST /api/v1/auth/register
-router.post('/register', async (req: Request, res: Response, next: NextFunction) => {
-  try {
-    const dto = registerSchema.parse(req.body);
-    const tokens = await authService.register(dto);
-    res.status(201).json(tokens);
-  } catch (err) {
-    next(err);
-  }
-});
 
 // POST /api/v1/auth/login
 router.post('/login', async (req: Request, res: Response, next: NextFunction) => {

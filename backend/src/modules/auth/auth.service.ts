@@ -4,7 +4,7 @@ import { RolUsuario } from '../../generated/prisma/client';
 import { prisma } from '../../db/prisma';
 import { env } from '../../config/env';
 import { createError } from '../../middleware/error';
-import type { RegisterDto, LoginDto } from './auth.schemas';
+import type { LoginDto } from './auth.schemas';
 
 interface Tokens {
   accessToken: string;
@@ -42,22 +42,6 @@ async function buildTokens(id: string, email: string, rol: RolUsuario): Promise<
 async function persistRefreshToken(userId: string, refreshToken: string): Promise<void> {
   const hash = await bcrypt.hash(refreshToken, 10);
   await prisma.usuario.update({ where: { id: userId }, data: { refreshToken: hash } });
-}
-
-// ── Service methods ────────────────────────────────────────────────────────────
-
-export async function register(dto: RegisterDto): Promise<Tokens> {
-  const existing = await prisma.usuario.findUnique({ where: { email: dto.email } });
-  if (existing) throw createError('El email ya está registrado', 409);
-
-  const passwordHash = await bcrypt.hash(dto.password, 12);
-  const user = await prisma.usuario.create({
-    data: { nombre: dto.nombre, email: dto.email, passwordHash },
-  });
-
-  const tokens = await buildTokens(user.id, user.email, user.rol);
-  await persistRefreshToken(user.id, tokens.refreshToken);
-  return tokens;
 }
 
 export async function login(dto: LoginDto): Promise<Tokens> {

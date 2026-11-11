@@ -1,13 +1,22 @@
+import { diasHasta } from '../../lib/fechas';
+
 type Semaforo = 'VERDE' | 'AMARILLO' | 'ROJO';
 
 const MAP: Record<Semaforo, { label: string; color: string; glass: string }> = {
   VERDE: { label: 'Al día', color: 'var(--verde)', glass: 'var(--verde-glass)' },
   AMARILLO: { label: 'En riesgo', color: 'var(--amarillo)', glass: 'var(--amarillo-glass)' },
-  ROJO: { label: 'Vencido', color: 'var(--rojo)', glass: 'var(--rojo-glass)' },
+  ROJO: { label: 'Crìtico / Vencido', color: 'var(--rojo)', glass: 'var(--rojo-glass)' },
 };
 
-export function SemaforoBadge({ value }: { value: Semaforo }) {
-  const { label, color, glass } = MAP[value];
+export function SemaforoBadge({
+  value,
+  fechaFin,
+}: {
+  value: Semaforo;
+  fechaFin?: string;
+}) {
+  const semaforo = fechaFin && diasHasta(fechaFin) < 0 ? 'ROJO' : value;
+  const { label, color, glass } = MAP[semaforo];
   return (
     <span
       className="badge"

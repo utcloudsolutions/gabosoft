@@ -40,9 +40,9 @@ function fmtCOP(val: number) {
 }
 
 const SEMAFORO_OPTIONS: SelectOption[] = [
-  { value: 'VERDE', label: 'Verde' },
-  { value: 'AMARILLO', label: 'Amarillo' },
-  { value: 'ROJO', label: 'Rojo' },
+  { value: 'VERDE', label: 'Al día' },
+  { value: 'AMARILLO', label: 'En riesgo' },
+  { value: 'ROJO', label: 'Crítico / Vencido' },
 ];
 
 const HITO_ESTADO_CFG: Record<EstadoHito, { label: string; color: string; Icon: typeof Circle }> = {
@@ -322,7 +322,7 @@ function ContratoRow({
     >
       {/* Línea 1: número + semáforo + botones */}
       <div style={{ display: 'flex', alignItems: 'center', gap: 'var(--gap-md)' }}>
-        <SemaforoBadge value={c.semaforo} />
+        <SemaforoBadge value={c.semaforo} fechaFin={c.fechaFin} />
         <div style={{ flex: 1, minWidth: 0 }}>
           <p
             style={{
@@ -495,7 +495,7 @@ function DetallePanel({
               marginBottom: 'var(--gap-xs)',
             }}
           >
-            <SemaforoBadge value={contrato.semaforo} />
+            <SemaforoBadge value={contrato.semaforo} fechaFin={contrato.fechaFin} />
             <span style={{ color: 'var(--text-muted)', fontSize: 11 }}>
               {contrato.numeroContrato}
             </span>

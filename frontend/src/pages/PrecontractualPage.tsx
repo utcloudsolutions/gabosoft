@@ -20,7 +20,7 @@ import {
 import { api } from '../lib/api';
 import { Select, type SelectOption } from '../components/ui/Select';
 import { useAuthStore } from '../store/authStore';
-import { fmtFecha } from '../lib/fechas';
+import { diasHasta, fmtFecha } from '../lib/fechas';
 
 // ── Columnas del Kanban ────────────────────────────────────────────────────────
 const COLUMNS: { estado: EstadoProceso; label: string; color: string; glow: string }[] = [
@@ -392,9 +392,29 @@ function ProcesoCard({
   onEdit: (p: Proceso) => void;
 }) {
   const siguiente = TRANSICIONES[proceso.estado] ?? [];
+  const diasCierre = proceso.fechaCierre
+    ? diasHasta(proceso.fechaCierre)
+    : null;
 
-  return (
-    <div
+  const textoCierre =
+    diasCierre === null
+      ? ''
+      : diasCierre > 0
+        ? `Cierra en ${diasCierre} ${diasCierre === 1 ? 'día' : 'días'}`
+        : diasCierre === 0
+          ? 'Cierra hoy'
+          : `Cerró hace ${Math.abs(diasCierre)} ${
+              Math.abs(diasCierre) === 1 ? 'día' : 'días'
+            }`;
+
+  const colorCierre =
+    diasCierre !== null && diasCierre >= 0 && diasCierre <= 5
+      ? 'var(--rojo)'
+      : diasCierre !== null && diasCierre >= 6 && diasCierre <= 15
+        ? 'var(--amarillo)'
+        : 'var(--text-secondary)';
+  return (           
+   <div
       style={{
         background: 'rgba(255,255,255,0.06)',
         border: '1px solid var(--glass-border)',
@@ -415,11 +435,18 @@ function ProcesoCard({
         <MetaRow icon={<Building2 size={11} />} text={proceso.entidad.nombre} />
         <MetaRow icon={<User size={11} />} text={proceso.responsable.nombre} />
         {proceso.fechaCierre && (
-          <MetaRow
-            icon={<Calendar size={11} />}
-            text={`Cierre: ${fmtFecha(proceso.fechaCierre)}`}
-          />
-        )}
+  <div style={{ display: 'flex', alignItems: 'center', gap: 5, flexWrap: 'wrap' }}>
+    <span style={{ color: 'var(--text-muted)', display: 'flex' }}>
+      <Calendar size={11} />
+    </span>
+    <span style={{ color: 'var(--text-secondary)', fontSize: 11 }}>
+      Cierre: {fmtFecha(proceso.fechaCierre)}
+    </span>
+    <span style={{ color: colorCierre, fontSize: 11, fontWeight: 600 }}>
+      {textoCierre}
+    </span>
+  </div>
+)}
         {proceso.valorEstimado && (
           <MetaRow icon={<DollarSign size={11} />} text={fmtCOP(proceso.valorEstimado)} />
         )}

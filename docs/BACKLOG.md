@@ -13,7 +13,7 @@ y en qué archivos mirar), una **guía técnica** y los **criterios de aceptaci�
 
 1. **Antes de la primera tarea**, lee el [README](../README.md) y levanta el proyecto con la
    [guía de desarrollo](DESARROLLO.md). Si no puedes hacerlo funcionar en tu máquina, esa es tu primera tarea: pide ayuda.
-2. Toma las tareas **en orden de bloque**. Dentro de un bloque puedes elegir cualquiera que no tenga dependencias pendientes.
+2. Toma las tareas **en orden de bloque**. El **bloque 1b** corrige errores que impiden probar el bloque 2: hazlo antes. Dentro de un bloque puedes elegir cualquiera que no tenga dependencias pendientes.
 3. Una tarea = una rama = un Pull Request (`feat/T-07-historial-proceso`, `fix/T-04-register`...).
 4. Si una tarea dice **🟠 Requiere decisión**, no empieces hasta que el líder confirme la opción.
 
@@ -54,8 +54,12 @@ Además de sus criterios propios, una tarea solo está terminada si:
 | T-03 | Inventario de licencias (`LICENSES.md`) | 0 · Higiene | 🟢 | S | — |
 | T-18 | Corregir el inventario de licencias | 0 · Higiene | 🟢 | S | T-03 |
 | T-04 | Cerrar el registro público de usuarios | 1 · Seguridad | 🟢 | S | — |
+| T-19 | Listas vacías de entidad y responsable en los formularios | 1b · Desbloqueo | 🟢 | S | — |
+| T-20 | Lista de responsables para SUPERVISOR y COLABORADOR | 1b · Desbloqueo | 🔵 | M | T-19 |
+| T-21 | Datos de demostración para probar | 1b · Desbloqueo | 🔵 | M | — |
+| T-22 | Listas y fechas nativas ilegibles en el tema oscuro | 1b · Desbloqueo | 🟢 | S | — |
 | T-05 | Textos del semáforo según días restantes | 2 · Funcionalidad | 🟢 | S | 🟠 decisión |
-| T-06 | Días restantes en las tarjetas del Kanban | 2 · Funcionalidad | 🟢 | S | — |
+| T-06 | Días restantes en las tarjetas del Kanban | 2 · Funcionalidad | 🟢 | S | T-19, T-21 |
 | T-07 | Ver el historial de un proceso | 2 · Funcionalidad | 🟢 | M | — |
 | T-08 | Filtros por entidad y responsable en Precontractual | 2 · Funcionalidad | 🟢 | M | — |
 | T-09 | Recordar notificaciones leídas | 2 · Funcionalidad | 🟢 | S | — |
@@ -243,6 +247,180 @@ Tareas cortas, ideales para el primer día: obligan a recorrer el proyecto sin r
 
 ---
 
+## Bloque 1b — Desbloqueo de pruebas
+
+> Se agregó el 18-nov-2026. Al revisar T-06 se encontró que los formularios de **Nuevo proceso** y
+> **Nuevo contrato** muestran las listas de entidad y responsable **vacías** ("Sin opciones"), que la
+> base local no tiene entidades ni aliados y que la lista de **tipos** del catálogo no se puede leer.
+> Sin estas correcciones no se pueden validar los criterios de T-06 en adelante.
+
+### T-19 · Listas vacías de entidad y responsable en los formularios
+
+🟢 Junior · **S** · Sin dependencias · **Bloqueante**
+
+**Historia de usuario**
+> Como **administrador**, quiero elegir la entidad y el responsable al crear un proceso o un contrato,
+> para poder registrarlos (hoy las listas aparecen vacías y el formulario no se puede enviar).
+
+**Contexto**
+- El error se reproduce en local, con ADMIN, en `/precontractual` → "Nuevo proceso" y en
+  `/contratos` → "Nuevo contrato": las listas "Entidad" y "Responsable" dicen **"Sin opciones"**,
+  aunque `GET /api/v1/entidades` y `GET /api/v1/usuarios` responden 200 con datos.
+- **Causa:** el hook `useSelects()` (repetido en `PrecontractualPage.tsx` y `ContratosPage.tsx`) espera
+  que el API devuelva un **arreglo**, pero desde abril los listados devuelven un objeto paginado
+  `{ items, total, page, limit, pages }` (ver README §5.4). El `.map()` falla y el error se pierde en un
+  `.catch(() => {})` vacío.
+- Además, las dos peticiones van juntas en un `Promise.all`: si una falla, **las dos listas** quedan vacías.
+
+**Guía técnica**
+1. Crea `frontend/src/hooks/useOpcionesFormulario.ts` con un único hook que reemplace los dos `useSelects()`.
+2. Usa `entidadesApi.list()` de `lib/api.catalogos.ts` en lugar de `api.get` directo, y lee `res.items`.
+   Pide el máximo por página (`limit: 200`); si hace falta, agrega ese parámetro a `entidadesApi.list`.
+3. Carga entidades y responsables **por separado** (cada una con su propio `try/catch`), para que el error
+   de una no vacíe la otra.
+4. Si una carga falla, devuelve también un mensaje de error y muéstralo en el formulario
+   (por ejemplo, debajo del select: "No se pudieron cargar los responsables").
+5. Usa el hook en `PrecontractualPage.tsx` y `ContratosPage.tsx` y borra los dos `useSelects()`.
+
+**Criterios de aceptación**
+- [ ] Como ADMIN, "Nuevo proceso" lista todas las entidades activas y los usuarios en sus selects.
+- [ ] Lo mismo en "Nuevo contrato".
+- [ ] Se puede crear un proceso y un contrato completos desde el navegador.
+- [ ] Si se simula un fallo de `/usuarios` (por ejemplo, entrando como SUPERVISOR), la lista de **entidades sigue cargando** y se ve un mensaje de error en responsables.
+- [ ] Ya no existe código que lea un listado del API como si fuera un arreglo (`grep -rn "get<.*\[\]>" frontend/src` no devuelve listados paginados).
+- [ ] No quedan `.catch(() => {})` vacíos en el hook nuevo.
+
+---
+
+### T-20 · Lista de responsables para SUPERVISOR y COLABORADOR
+
+🔵 Junior+ · **M** · Depende de T-19 · **Bloqueante**
+
+**Historia de usuario**
+> Como **supervisor**, quiero ver la lista de personas al asignar el responsable de un proceso o contrato,
+> para poder crearlos sin pedirle ayuda a un administrador.
+
+**Contexto**
+- `GET /api/v1/usuarios` es **solo para ADMIN** (`router.use(requireAuth, requireRoles('ADMIN'))` en
+  `usuarios.router.ts`): con SUPERVISOR responde **403**. Pero un SUPERVISOR sí puede crear procesos y
+  contratos, así que necesita esa lista.
+- No conviene abrir `/usuarios`, porque devuelve emails y roles. Hace falta un endpoint que solo exponga
+  lo necesario para un select.
+
+**Guía técnica**
+1. **Backend:** crea `backend/src/modules/usuarios/responsables.router.ts` con `GET /` protegido solo con
+   `requireAuth`, que devuelva los usuarios **activos** ordenados por nombre, únicamente con `id` y `nombre`.
+   ```json
+   [{ "id": "…", "nombre": "Admin Dev" }, { "id": "…", "nombre": "Supervisor Dev" }]
+   ```
+   Pon la consulta en `usuarios.service.ts` (por ejemplo, `listResponsables()`) usando `select: { id: true, nombre: true }`.
+2. Móntalo en `backend/src/app.ts` como `app.use('/api/v1/responsables', responsablesRouter)`.
+3. **Frontend:** en `lib/api.catalogos.ts` agrega `responsablesApi.list()` y úsalo en el hook de T-19 en lugar de `/usuarios`.
+4. Documenta la ruta en la tabla de la API del README (§8). Es una lista de opciones para selects, por eso
+   **no** va paginada: indícalo en la descripción.
+
+**Criterios de aceptación**
+- [ ] `GET /api/v1/responsables` responde 200 para ADMIN, SUPERVISOR y COLABORADOR, y 401 sin token.
+- [ ] La respuesta solo tiene `id` y `nombre` (sin email, rol ni contraseña).
+- [ ] Los usuarios desactivados no aparecen.
+- [ ] Como SUPERVISOR se puede crear un proceso y un contrato eligiendo entidad y responsable.
+- [ ] `GET /api/v1/usuarios` sigue respondiendo 403 para SUPERVISOR.
+
+---
+
+### T-21 · Datos de demostración para probar
+
+🔵 Junior+ · **M** · Sin dependencias · **Bloqueante para validar T-06 en adelante**
+
+**Historia de usuario**
+> Como **desarrollador**, quiero cargar con un comando datos de ejemplo realistas, para poder probar
+> los criterios de aceptación de cada tarea sin crear todo a mano.
+
+**Contexto**
+- `npm run db:seed -w backend` solo crea los 3 usuarios de prueba. La BD local queda sin entidades,
+  aliados, procesos ni contratos, así que las listas, el Kanban y las alertas aparecen vacíos.
+- Varias tareas necesitan casos concretos. Por ejemplo, T-06 pide procesos que cierran hoy, en 3, 10 y 30
+  días y sin fecha; T-05 pide contratos vencidos y por vencer.
+- Las fechas deben ser **relativas a hoy**, para que los datos sirvan cualquier día. En el backend ya existen
+  `hoyFecha()` y `sumarDias()` en `src/lib/fechas.ts`.
+
+**Guía técnica**
+1. Crea `backend/prisma/seed-demo.ts` y el script `"db:seed:demo": "tsx prisma/seed-demo.ts"` en
+   `backend/package.json`. **No** lo agregues a `db:setup`: los datos de demo son opcionales.
+2. Si `NODE_ENV === 'production'`, el script debe terminar sin hacer nada y mostrar un aviso.
+3. Debe ser **idempotente** (ejecutarlo dos veces no duplica nada). Usa `upsert` por campos únicos
+   (`nit` de entidad y aliado, `email` de usuario, `numeroContrato`), y `findFirst` + crear/actualizar
+   por `numeroProceso` (prefijo `DEMO-`).
+4. Datos mínimos:
+
+   | Qué | Cantidad | Detalle |
+   |---|---|---|
+   | Usuarios | +2 | Dos SUPERVISOR más (por ejemplo "Laura Gómez" y "Carlos Ruiz"), con la misma contraseña de prueba documentada. |
+   | Entidades | 4 | Con NIT, tipo (de la lista de tipos del formulario) y municipio. |
+   | Aliados | 3 | Con NIT y tipo (Consorcio, Unión Temporal, Persona Jurídica). |
+   | Procesos | 9 | ESTRUCTURACION que cierra **hoy**, en **3 días** y **sin fecha**; PRESENTACION que cierra en **10** y en **30 días**; uno que cerró **hace 2 días**; uno en cada estado final (GANADO, NO_ADJUDICADO, DESIERTO). Al menos 2 con aliados y responsables distintos. |
+   | Historial | 1+ por proceso | Un registro inicial (`estadoAnterior: null`) y, para los que no están en ESTRUCTURACION, los cambios hasta su estado actual. |
+   | Contratos | 4 | Vence **hace 5 días**, en **10 días**, en **40 días** y en **200 días**. Calcula el `semaforo` con `calcularSemaforo()` de `contratos.service.ts` (no lo escribas a mano). |
+   | Hitos | 3–5 | Uno vencido y pendiente, uno que vence hoy y uno completado. |
+
+5. Al terminar, imprime un resumen (cuántos registros creó o actualizó de cada tipo).
+6. Documenta el comando en el README (scripts y puesta en marcha) y en `DESARROLLO.md`.
+
+**Criterios de aceptación**
+- [ ] `npm run db:seed:demo -w backend` termina sin errores y muestra el resumen.
+- [ ] Ejecutarlo dos veces seguidas no duplica registros (comprobado con DBeaver o Prisma Studio).
+- [ ] Después de ejecutarlo, el Kanban tiene procesos en las 5 columnas y la pestaña Aliados muestra 3.
+- [ ] La página de Notificaciones muestra los 4 tipos de alerta (contrato en riesgo, hito vencido, contrato por vencer, proceso por cerrar).
+- [ ] Con `NODE_ENV=production` el script no modifica la BD.
+- [ ] Los usuarios de prueba originales (admin, supervisor, colaborador) siguen funcionando.
+
+---
+
+### T-22 · Listas y fechas nativas ilegibles en el tema oscuro
+
+🟢 Junior · **S** · Sin dependencias
+
+**Historia de usuario**
+> Como **usuario**, quiero que todas las listas desplegables y los selectores de fecha se vean con el
+> estilo de la aplicación, para poder leer las opciones y elegir sin adivinar.
+
+**Contexto**
+- En Catálogos → "Nuevo aliado" (y "Nueva entidad"), al abrir **Tipo** las opciones se ven en blanco
+  sobre blanco: solo se lee la opción resaltada.
+- **Causa:** esos dos campos son `<select>` nativos del navegador. Heredan de la clase `.input` el texto
+  claro del tema (`color: rgba(255,255,255,0.92)`), pero la ventana de opciones la dibuja el sistema
+  operativo con fondo blanco.
+- Revisión completa del frontend:
+
+  | Control | Dónde | Estado |
+  |---|---|---|
+  | `<select>` nativo | `CatalogosPage.tsx`: tipo de entidad y tipo de aliado | ❌ Opciones ilegibles |
+  | `<input type="date">` | `ContratosPage.tsx` (3) y `PrecontractualPage.tsx` (1) | ⚠ Ícono de calendario negro sobre fondo oscuro y calendario desplegable en tema claro |
+  | Componente `Select` del proyecto | Precontractual (4) y Contratos (3) | ✅ Estilo correcto |
+  | `<input type="checkbox">` | Catálogos ("Mostrar inactivas/os") | ✅ Usa `accent-color` |
+
+- El proyecto ya tiene el componente `frontend/src/components/ui/Select.tsx`, con el estilo correcto.
+- El CSS no declara `color-scheme`, que es la propiedad que le indica al navegador que dibuje sus
+  controles nativos en modo oscuro.
+
+**Guía técnica**
+1. En `CatalogosPage.tsx` reemplaza los dos `<select className="input">` por el componente `Select`.
+   Convierte las listas a su formato:
+   `TIPO_ENTIDAD_OPTIONS.map((t) => ({ value: t, label: t }))`, más la opción vacía "Sin especificar"
+   (o usa el `placeholder` del componente).
+2. En `frontend/src/styles/globals.css`, dentro de `:root`, agrega `color-scheme: dark;`. Con eso el
+   navegador dibuja en oscuro el ícono y el calendario de los campos de fecha.
+3. Revisa que no queden `<select` nativos: `grep -rn "<select" frontend/src` no debe devolver resultados.
+
+**Criterios de aceptación**
+- [ ] En "Nueva entidad" y "Nuevo aliado", el campo Tipo usa el mismo desplegable que Precontractual y todas las opciones se leen.
+- [ ] Al editar una entidad o un aliado con tipo, el valor guardado aparece seleccionado; elegir "Sin especificar" guarda el campo vacío.
+- [ ] En los formularios de proceso, contrato e hito, el ícono del calendario se ve claro sobre el fondo oscuro y el calendario se abre en tema oscuro (Chrome y Edge).
+- [ ] `grep -rn "<select" frontend/src` no devuelve resultados.
+- [ ] Ningún otro control cambió de aspecto (compara con capturas de antes).
+
+---
+
 ## Bloque 2 — Funcionalidad
 
 ### T-05 · Textos del semáforo según días restantes
@@ -283,7 +461,7 @@ Tareas cortas, ideales para el primer día: obligan a recorrer el proyecto sin r
 
 ### T-06 · Días restantes en las tarjetas del Kanban
 
-🟢 Junior · **S** · Sin dependencias
+🟢 Junior · **S** · Depende de T-19 y T-21 (para crear procesos y tener casos de prueba)
 
 **Historia de usuario**
 > Como **analista**, quiero ver en cada tarjeta del Kanban cuántos días faltan para el cierre, con un
@@ -353,9 +531,8 @@ Tareas cortas, ideales para el primer día: obligan a recorrer el proyecto sin r
 - Ya existe un componente `Select` en `frontend/src/components/ui/Select.tsx`.
 
 **Guía técnica**
-1. Carga la lista de entidades (`entidadesApi`) y de usuarios para llenar los selects.
-   ⚠ `GET /usuarios` es solo para ADMIN; para los demás roles, arma la lista de responsables a partir de
-   los procesos ya cargados (sin duplicados), o consulta al líder.
+1. Reutiliza el hook de T-19 (`useOpcionesFormulario`) para llenar los selects de entidad y responsable.
+   Con T-20 terminada, la lista de responsables funciona para todos los roles.
 2. Agrega dos `Select`: "Todas las entidades" y "Todos los responsables".
 3. Envía los filtros elegidos como parámetros a `procesosApi.list(...)`.
 4. Agrega un botón "Limpiar filtros".
@@ -501,6 +678,7 @@ Tareas cortas, ideales para el primer día: obligan a recorrer el proyecto sin r
 **Contexto**
 - Requisito RF-03. El backend **ya existe**: `GET/POST/PUT/DELETE /api/v1/usuarios` (solo ADMIN;
   `DELETE` desactiva). Revisa `usuarios.schemas.ts` para ver los campos.
+- Mientras esta tarea no esté lista, los usuarios para pruebas salen del seed de demo (T-21).
 - `CatalogosPage.tsx` tiene pestañas Entidades y Aliados (`type Tab = 'entidades' | 'aliados'`).
   `EntidadesTab` es el mejor ejemplo a copiar.
 

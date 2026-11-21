@@ -26,11 +26,11 @@ import {
   type CreateHitoPayload,
   type UpdateHitoPayload,
 } from '../lib/api.contratos';
-import { api } from '../lib/api';
 import { SemaforoBadge } from '../components/ui/SemaforoBadge';
 import { Select, type SelectOption } from '../components/ui/Select';
 import { useAuthStore } from '../store/authStore';
 import { diasHasta, fmtFecha } from '../lib/fechas';
+import { useOpcionesFormulario } from '../hooks/useOpcionesFormulario';
 
 // ── Helpers ───────────────────────────────────────────────────────────────────
 function fmtCOP(val: number) {
@@ -51,24 +51,6 @@ const HITO_ESTADO_CFG: Record<EstadoHito, { label: string; color: string; Icon: 
   COMPLETADO: { label: 'Completado', color: 'var(--verde)', Icon: CheckCircle2 },
   VENCIDO: { label: 'Vencido', color: 'var(--rojo)', Icon: AlertCircle },
 };
-
-// ── Hook selects ──────────────────────────────────────────────────────────────
-function useSelects() {
-  const [entidades, setEntidades] = useState<SelectOption[]>([]);
-  const [usuarios, setUsuarios] = useState<SelectOption[]>([]);
-  useEffect(() => {
-    Promise.all([
-      api.get<{ id: string; nombre: string }[]>('/entidades').then((r) => r.data),
-      api.get<{ id: string; nombre: string }[]>('/usuarios').then((r) => r.data),
-    ])
-      .then(([e, u]) => {
-        setEntidades(e.map((x) => ({ value: x.id, label: x.nombre })));
-        setUsuarios(u.map((x) => ({ value: x.id, label: x.nombre })));
-      })
-      .catch(() => {});
-  }, []);
-  return { entidades, usuarios };
-}
 
 // ═══════════════════════════════════════════════════════════════════════════════
 // Main Page
@@ -874,7 +856,8 @@ function ContratoModal({
   onClose: () => void;
   onSaved: (c: Contrato) => void;
 }) {
-  const { entidades, usuarios } = useSelects();
+  const { entidades, usuarios, errorEntidades, errorResponsables } =
+    useOpcionesFormulario();
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState('');
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -1034,6 +1017,11 @@ function ContratoModal({
                 options={entidades}
                 placeholder="Seleccionar..."
               />
+              {errorEntidades && (
+                <p role="alert" style={{ color: 'var(--rojo)', fontSize: 12 }}>
+                  {errorEntidades}
+                </p>
+              )}
             </FF>
             <FF label="Responsable *">
               <Select
@@ -1042,6 +1030,11 @@ function ContratoModal({
                 options={usuarios}
                 placeholder="Seleccionar..."
               />
+              {errorResponsables && (
+                <p role="alert" style={{ color: 'var(--rojo)', fontSize: 12 }}>
+                  {errorResponsables}
+                </p>
+              )}
             </FF>
           </div>
 

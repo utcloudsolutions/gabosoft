@@ -69,9 +69,11 @@ export interface UpdateAliadoPayload extends Partial<CreateAliadoPayload> {
 
 // ── API ───────────────────────────────────────────────────────────────────────
 export const entidadesApi = {
-  list: (todas = false) =>
+  list: (todas = false, limit = 50) =>
     api
-      .get<PaginatedResponse<Entidad>>('/entidades', { params: todas ? { todas: 'true' } : {} })
+      .get<PaginatedResponse<Entidad>>('/entidades', {
+        params: { ...(todas ? { todas: 'true' } : {}), limit },
+      })
       .then((r) => r.data),
   create: (payload: CreateEntidadPayload) =>
     api.post<Entidad>('/entidades', payload).then((r) => r.data),

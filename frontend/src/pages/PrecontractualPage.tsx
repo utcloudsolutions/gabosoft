@@ -17,10 +17,10 @@ import {
   type EstadoProceso,
   type CreateProcesoPayload,
 } from '../lib/api.procesos';
-import { api } from '../lib/api';
 import { Select, type SelectOption } from '../components/ui/Select';
 import { useAuthStore } from '../store/authStore';
 import { diasHasta, fmtFecha } from '../lib/fechas';
+import { useOpcionesFormulario } from '../hooks/useOpcionesFormulario';
 
 // ── Columnas del Kanban ────────────────────────────────────────────────────────
 const COLUMNS: { estado: EstadoProceso; label: string; color: string; glow: string }[] = [
@@ -75,26 +75,6 @@ function fmtCOP(val: number) {
   if (val >= 1_000_000_000) return `$${(val / 1_000_000_000).toFixed(1)}B`;
   if (val >= 1_000_000) return `$${(val / 1_000_000).toFixed(0)}M`;
   return `$${val.toLocaleString('es-CO')}`;
-}
-
-// ── Hook: entidades y usuarios para selects ───────────────────────────────────
-function useSelects() {
-  const [entidades, setEntidades] = useState<SelectOption[]>([]);
-  const [usuarios, setUsuarios] = useState<SelectOption[]>([]);
-
-  useEffect(() => {
-    Promise.all([
-      api.get<{ id: string; nombre: string }[]>('/entidades').then((r) => r.data),
-      api.get<{ id: string; nombre: string }[]>('/usuarios').then((r) => r.data),
-    ])
-      .then(([e, u]) => {
-        setEntidades(e.map((x) => ({ value: x.id, label: x.nombre })));
-        setUsuarios(u.map((x) => ({ value: x.id, label: x.nombre })));
-      })
-      .catch(() => {});
-  }, []);
-
-  return { entidades, usuarios };
 }
 
 // ═══════════════════════════════════════════════════════════════════════════════
@@ -549,7 +529,7 @@ function ProcesoModal({
   onClose: () => void;
   onSaved: (p: Proceso) => void;
 }) {
-  const { entidades, usuarios } = useSelects();
+  const { entidades, usuarios, errorEntidades, errorResponsables } = useOpcionesFormulario();
   const [saving, setSaving] = useState(false);
   const [err, setErr] = useState('');
   const overlayRef = useRef<HTMLDivElement>(null);
@@ -692,6 +672,11 @@ function ProcesoModal({
                 options={entidades}
                 placeholder="Seleccionar entidad..."
               />
+              {errorEntidades && (
+                <p role="alert" style={{ color: 'var(--rojo)', fontSize: 12 }}>
+                  {errorEntidades}
+                </p>
+              )}
             </FormField>
             <FormField label="Responsable *">
               <Select
@@ -700,6 +685,11 @@ function ProcesoModal({
                 options={usuarios}
                 placeholder="Seleccionar responsable..."
               />
+              {errorResponsables && (
+                <p role="alert" style={{ color: 'var(--rojo)', fontSize: 12 }}>
+                  {errorResponsables}
+                </p>
+              )}
             </FormField>
           </div>
 
